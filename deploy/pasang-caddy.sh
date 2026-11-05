@@ -37,12 +37,15 @@ fi
 
 mkdir -p "$CERT_DIR"; chmod 700 "$CERT_DIR"
 
-# 2. Ikat aplikasi ke localhost saja (di balik Caddy), lewat drop-in systemd
+# 2. Ikat aplikasi ke localhost saja (di balik Caddy), lewat drop-in systemd.
+#    next start tidak membaca env HOSTNAME, jadi override ExecStart dengan flag -H.
 echo "==> Mengikat aplikasi ke 127.0.0.1 (hanya lewat Caddy)"
+NPM_BIN="$(command -v npm)"
 mkdir -p /etc/systemd/system/perwira-docs.service.d
 cat > /etc/systemd/system/perwira-docs.service.d/bind-localhost.conf <<EOF
 [Service]
-Environment=HOSTNAME=127.0.0.1
+ExecStart=
+ExecStart=$NPM_BIN start -- -H 127.0.0.1
 EOF
 systemctl daemon-reload
 systemctl restart perwira-docs 2>/dev/null || true
