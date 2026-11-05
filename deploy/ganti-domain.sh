@@ -37,8 +37,12 @@ else
 fi
 echo "  .env  -> NEXT_PUBLIC_SITE_URL=https://$BARU"
 
-# 2. Caddyfile (TLS pakai Cloudflare Origin Certificate di $CERT_DIR)
-cat > "$CADDYFILE" <<EOF
+# 2. Caddyfile. Kalau sertifikat origin sudah ada -> HTTPS (Cloudflare Full strict).
+#    Kalau belum -> HTTP saja di port 80 (Cloudflare SSL mode "Flexible"); visitor tetap
+#    dapat HTTPS dari edge Cloudflare. Tambah sertifikat lalu jalankan lagi untuk naik ke HTTPS.
+if [ -s "$CERT_DIR/origin.pem" ] && [ -s "$CERT_DIR/origin.key" ]; then
+  MODE=https
+  cat > "$CADDYFILE" <<EOF
 # Domain situs PerwiraMedia Docs. Ganti dengan:
 #   bash $APP_DIR/deploy/ganti-domain.sh <domain-baru>
 $BARU {
@@ -48,19 +52,30 @@ $BARU {
     reverse_proxy 127.0.0.1:3000
 }
 EOF
-echo "  Caddyfile -> $BARU"
+else
+  MODE=http
+  cat > "$CADDYFILE" <<EOF
+# Domain situs PerwiraMedia Docs (mode HTTP; Cloudflare SSL mode: Flexible).
+# Untuk HTTPS di origin: pasang $CERT_DIR/origin.pem & origin.key lalu jalankan lagi script ini.
+#   bash $APP_DIR/deploy/ganti-domain.sh <domain-baru>
+http://$BARU {
+    encode gzip zstd
+    reverse_proxy 127.0.0.1:3000
+}
+EOF
+fi
+echo "  Caddyfile -> $BARU (mode $MODE)"
 
 # 3. terapkan
 systemctl restart perwira-docs 2>/dev/null || true
-if [ -s "$CERT_DIR/origin.pem" ] && [ -s "$CERT_DIR/origin.key" ]; then
-  if caddy validate --config "$CADDYFILE" >/dev/null 2>&1; then
-    systemctl reload caddy 2>/dev/null || systemctl restart caddy
-    echo "Selesai. Situs: https://$BARU"
+if caddy validate --config "$CADDYFILE" >/dev/null 2>&1; then
+  systemctl enable caddy >/dev/null 2>&1 || true
+  systemctl reload caddy 2>/dev/null || systemctl restart caddy
+  if [ "$MODE" = https ]; then
+    echo "Selesai (HTTPS). Situs: https://$BARU  | Cloudflare SSL mode: Full (strict)"
   else
-    echo "Caddyfile tidak valid, cek: caddy validate --config $CADDYFILE"; exit 1
+    echo "Selesai (HTTP origin). Situs: https://$BARU  | SET Cloudflare SSL mode: Flexible"
   fi
 else
-  echo
-  echo "Caddy belum di-reload: sertifikat origin belum ada di $CERT_DIR/origin.pem & origin.key."
-  echo "Pasang sertifikat Cloudflare Origin dulu, lalu: systemctl restart caddy"
+  echo "Caddyfile tidak valid, cek: caddy validate --config $CADDYFILE"; exit 1
 fi

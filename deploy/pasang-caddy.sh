@@ -60,25 +60,23 @@ command -v ufw >/dev/null 2>&1 || apt-get install -y ufw
 ufw allow 22/tcp >/dev/null; ufw allow 80/tcp >/dev/null; ufw allow 443/tcp >/dev/null
 yes | ufw enable >/dev/null 2>&1 || ufw --force enable
 
-# 5. Start Caddy kalau sertifikat sudah ada
+# 5. Status akhir (ganti-domain.sh sudah start Caddy: HTTP tanpa cert, HTTPS kalau cert ada)
 echo
-if [ -s "$CERT_DIR/origin.pem" ] && [ -s "$CERT_DIR/origin.key" ]; then
-  systemctl enable caddy >/dev/null 2>&1 || true
-  systemctl restart caddy
-  sleep 2
-  systemctl is-active --quiet caddy && echo "Caddy aktif. Situs: https://$DOMAIN" || echo "Caddy gagal start, cek: journalctl -u caddy -n 30"
-else
-  cat <<PETUNJUK
-Caddy belum bisa start: sertifikat origin belum ada.
+sleep 2
+if systemctl is-active --quiet caddy; then
+  if [ -s "$CERT_DIR/origin.pem" ] && [ -s "$CERT_DIR/origin.key" ]; then
+    echo "Caddy aktif (HTTPS origin). Di Cloudflare set SSL mode: Full (strict). Situs: https://$DOMAIN"
+  else
+    cat <<PETUNJUK
+Caddy aktif (HTTP origin di port 80). Situs: https://$DOMAIN
+  -> Di Cloudflare: A record $DOMAIN proxied (awan oranye), SSL/TLS mode = "Flexible".
 
-Buat di Cloudflare: SSL/TLS > Origin Server > Create Certificate.
-  - Hostnames: $DOMAIN  (disarankan tambah wildcard: *.${DOMAIN#*.} dan ${DOMAIN#*.})
-  - Simpan isinya di VPS:
-      $CERT_DIR/origin.pem   <- isi "Origin Certificate"
-      $CERT_DIR/origin.key   <- isi "Private Key"
-  - chmod 600 $CERT_DIR/origin.key
-Lalu: systemctl restart caddy
-
-Terakhir di Cloudflare: SSL/TLS > Overview > set mode ke "Full (strict)".
+Untuk naik ke HTTPS penuh nanti (disarankan), buat Cloudflare Origin Certificate
+(SSL/TLS > Origin Server), simpan ke $CERT_DIR/origin.pem & origin.key (chmod 600 origin.key),
+jalankan: bash $APP_DIR/deploy/ganti-domain.sh $DOMAIN  (otomatis pindah ke HTTPS),
+lalu set SSL mode Cloudflare ke "Full (strict)".
 PETUNJUK
+  fi
+else
+  echo "Caddy belum aktif. Cek: journalctl -u caddy -n 30"
 fi
