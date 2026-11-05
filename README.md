@@ -159,6 +159,24 @@ npm start                                   # port 3000
 
 Jalankan `npm start` lewat systemd atau pm2 supaya hidup lagi setelah reboot. Arahkan domain ke port 3000 lewat reverse proxy dengan HTTPS. Jadwal terbit berjalan di dalam proses ini, jadi tidak perlu cron terpisah.
 
+### HTTPS di belakang Cloudflare
+
+Kalau domain diproxy Cloudflare (A record awan oranye), pasang Caddy di VPS dengan Cloudflare Origin Certificate:
+
+```bash
+DOMAIN=docs.contoh.com bash deploy/pasang-caddy.sh
+```
+
+Script memasang Caddy, mengikat aplikasi ke 127.0.0.1 (hanya lewat Caddy), memasang firewall (ufw: 22/80/443), dan menulis Caddyfile. Lalu buat **Origin Certificate** di Cloudflare (SSL/TLS > Origin Server), simpan ke `/etc/perwira-docs/origin.pem` dan `origin.key`, jalankan `systemctl restart caddy`, dan set mode SSL Cloudflare ke **Full (strict)**. Disarankan Origin Certificate wildcard (`*.apex` + `apex`) supaya ganti subdomain tidak perlu sertifikat baru.
+
+**Ganti domain** (domain sementara, nanti pindah): satu perintah mengubah URL aplikasi dan Caddy sekaligus:
+
+```bash
+bash deploy/ganti-domain.sh docs.perwiramedia.com
+```
+
+Lalu arahkan A record domain baru ke VPS (proxied) di Cloudflare. Kalau pindah ke apex berbeda, buat Origin Certificate baru lebih dulu.
+
 **Cadangkan dua hal ini secara rutin:** berkas `payload.db` (beserta `payload.db-wal` kalau ada) dan folder `media/` berisi gambar unggahan.
 
 Endpoint publik `/api/cari`, `/api/masukan`, dan `/api/users/forgot-password` tidak butuh login. Batasi lajunya di reverse proxy (misalnya 30 permintaan per menit per IP) supaya tidak bisa dibanjiri.
