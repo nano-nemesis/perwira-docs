@@ -37,12 +37,28 @@ else
 fi
 echo "  .env  -> NEXT_PUBLIC_SITE_URL=https://$BARU"
 
+# IP Cloudflare dipercaya sebagai proxy, supaya IP asli pengunjung (CF-Connecting-IP /
+# X-Forwarded-For) sampai ke aplikasi. Tanpa ini semua pengunjung terlihat sebagai segelintir
+# IP Cloudflare dan rate limit pencarian/masukan ikut memblokir pengguna sah.
+CF_IPS="$( { curl -fsS --max-time 15 https://www.cloudflare.com/ips-v4; echo; curl -fsS --max-time 15 https://www.cloudflare.com/ips-v6; } 2>/dev/null \
+  | grep -E '^[0-9a-fA-F:.]+/[0-9]+$' | tr '\n' ' ')"
+# cadangan kalau unduhan gagal (daftar resmi per 2026-11)
+[ -n "$CF_IPS" ] || CF_IPS="173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32"
+GLOBAL="{
+	servers {
+		trusted_proxies static $CF_IPS
+		client_ip_headers CF-Connecting-IP X-Forwarded-For
+	}
+}
+"
+
 # 2. Caddyfile. Kalau sertifikat origin sudah ada -> HTTPS (Cloudflare Full strict).
 #    Kalau belum -> HTTP saja di port 80 (Cloudflare SSL mode "Flexible"); visitor tetap
 #    dapat HTTPS dari edge Cloudflare. Tambah sertifikat lalu jalankan lagi untuk naik ke HTTPS.
 if [ -s "$CERT_DIR/origin.pem" ] && [ -s "$CERT_DIR/origin.key" ]; then
   MODE=https
   cat > "$CADDYFILE" <<EOF
+$GLOBAL
 # Domain situs PerwiraMedia Docs. Ganti dengan:
 #   bash $APP_DIR/deploy/ganti-domain.sh <domain-baru>
 $BARU {
@@ -55,7 +71,8 @@ EOF
 else
   MODE=http
   cat > "$CADDYFILE" <<EOF
-# Domain situs PerwiraMedia Docs (mode HTTP; Cloudflare SSL mode: Flexible).
+$GLOBAL
+# Domain situs PerwiraMedia Docs (mode HTTP; SSL dipegang Cloudflare, SSL mode: Flexible).
 # Untuk HTTPS di origin: pasang $CERT_DIR/origin.pem & origin.key lalu jalankan lagi script ini.
 #   bash $APP_DIR/deploy/ganti-domain.sh <domain-baru>
 http://$BARU {
@@ -74,7 +91,8 @@ if caddy validate --config "$CADDYFILE" >/dev/null 2>&1; then
   if [ "$MODE" = https ]; then
     echo "Selesai (HTTPS). Situs: https://$BARU  | Cloudflare SSL mode: Full (strict)"
   else
-    echo "Selesai (HTTP origin). Situs: https://$BARU  | SET Cloudflare SSL mode: Flexible"
+    echo "Selesai (HTTP origin, SSL dari Cloudflare). Situs: https://$BARU"
+    echo "Di Cloudflare: SSL/TLS mode = Flexible, Edge Certificates > Always Use HTTPS = ON."
   fi
 else
   echo "Caddyfile tidak valid, cek: caddy validate --config $CADDYFILE"; exit 1
