@@ -1,0 +1,32 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 16px;
+  font: 15px/1.55 var(--f-isi), system-ui, sans-serif; color: #0e1a3a;
+  background:
+    radial-gradient(60vw 40vw at 100% 100%, rgba(94, 164, 255, 0.4), transparent 60%),
+    radial-gradient(40vw 30vw at 0% 100%, rgba(255, 138, 0, 0.2), transparent 60%),
+    #f5f8fe;
+}
+.kartu { width: 100%; max-width: 440px; padding: 36px; border-radius: 24px; background: #fff; box-shadow: 0 24px 60px rgba(25, 60, 140, 0.14); text-align: center; animation: masuk 500ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes masuk { from { opacity: 0; filter: blur(12px); transform: translateY(10px); } }
+.merek { display: flex; flex-direction: column; align-items: center; gap: 8px; font: 800 20px var(--f-judul); }
+.merek img { height: 44px; width: auto; }
+.merek b { color: #ff8a00; }
+.garis-langkah { display: flex; gap: 8px; margin: 22px 0; }
+.garis-langkah span { flex: 1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #2f80ff, #1b5fe0); }
+.garis-langkah .oranye { background: linear-gradient(90deg, #ff8a00, #ffb347); }
+h1 { margin: 0 0 6px; font: 800 24px var(--f-judul); }
+.redup { color: #4b587a; margin: 0 0 16px; }
+.kecil { font-size: 13px; }
+.qr img { border-radius: 12px; border: 1px solid #e7ecf4; }
+code { font-size: 12.5px; word-break: break-all; background: #f3f6fb; padding: 2px 6px; border-radius: 6px; }
+.isi { display: flex; flex-direction: column; gap: 12px; text-align: left; margin-top: 8px; }
+label { font-weight: 600; font-size: 14px; }
+input { height: 58px; padding: 0 16px; border: 1px solid #dce3ef; border-radius: 14px; background: #f8fafe; text-align: center; font: 700 24px var(--f-isi); letter-spacing: 0.3em; }
+input:focus { outline: 2px solid #1b5fe0; border-color: transparent; }
+.tombol { height: 50px; border: 0; border-radius: 12px; background: linear-gradient(90deg, #2f80ff, #1b5fe0); color: #fff; font: 700 16px var(--f-isi); cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; box-shadow: 0 10px 24px rgba(27, 95, 224, 0.3); }
+.tombol:disabled { opacity: 0.6; }
+.galat { margin: 0; color: #dc2626; font-size: 14px; }
+.cadangan { list-style: none; padding: 0; margin: 0 0 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font: 700 15px ui-monospace, monospace; }
+.cadangan li { padding: 8px; border-radius: 8px; background: #fff4e6; text-align: center; }
+.keluar { display: inline-block; margin-top: 18px; color: #1b5fe0; font-weight: 600; font-size: 14px; text-decoration: none; }

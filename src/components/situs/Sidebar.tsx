@@ -1,0 +1,75 @@
+import Link from 'next/link'
+import { ambilProduk, getPayload, publik } from '@/lib/payload'
+import { pilih, tautan, tautanWa, type Lang } from '@/lib/situs'
+import { Ikon } from './Ikon'
+
+export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
+  const payload = await getPayload()
+  const produk = await ambilProduk(lang)
+  const { docs } = await payload.find({
+    collection: 'docs',
+    locale: lang,
+    limit: 200,
+    depth: 0,
+    sort: 'urutan',
+    select: { judul: true, slug: true, produk: true },
+    ...publik,
+  })
+
+  return (
+    <aside className="samping" aria-label={pilih(lang, 'Navigasi dokumentasi', 'Documentation navigation')}>
+      <select aria-label={pilih(lang, 'Versi dokumentasi', 'Docs version')} className="pilih-versi" defaultValue="1">
+        <option value="1">v1.0 ({pilih(lang, 'Terbaru', 'Latest')})</option>
+      </select>
+      <nav className="samping-menu">
+        <Link href={tautan(lang, '/')} className="samping-item">
+          <Ikon nama="rumah" /> {pilih(lang, 'Beranda', 'Home')}
+        </Link>
+        <Link href={tautan(lang, '/panduan')} className="samping-item">
+          <Ikon nama="roket" /> {pilih(lang, 'Semua panduan', 'All guides')}
+        </Link>
+        {produk.map((p) => {
+          const isi = docs.filter((d) => d.produk === p.id)
+          if (!isi.length) return null
+          return (
+            <details key={p.id} open={isi.some((d) => d.slug === aktif) || !aktif}>
+              <summary className="samping-item">
+                <span className={`ikon-${p.nada}`}>
+                  <Ikon nama={p.ikon} />
+                </span>
+                {p.nama}
+              </summary>
+              <div className="samping-anak">
+                {isi.map((d) => (
+                  <Link key={d.slug} href={tautan(lang, `/panduan/${d.slug}`)} aria-current={d.slug === aktif ? 'page' : undefined}>
+                    {d.judul}
+                  </Link>
+                ))}
+              </div>
+            </details>
+          )
+        })}
+        <Link href={tautan(lang, '/changelog')} className="samping-item">
+          <Ikon nama="jam" /> Changelog
+        </Link>
+      </nav>
+      <div className="bantuan">
+        <div className="baris">
+          <Ikon nama="headset" ukuran={24} />
+          <div>
+            <b>{pilih(lang, 'Panduan tidak ditemukan?', "Can't find a guide?")}</b>
+            <p>{pilih(lang, 'Ceritakan kendalamu, tim PerwiraMedia bantu langsung lewat WhatsApp.', 'Tell us what you need, our team replies on WhatsApp.')}</p>
+          </div>
+        </div>
+        <a
+          href={tautanWa(pilih(lang, 'Halo PerwiraMedia, saya tidak menemukan panduan untuk: ', "Hi PerwiraMedia, I can't find a guide for: "))}
+          className="tombol-wa"
+          target="_blank"
+          rel="noopener"
+        >
+          {pilih(lang, 'Tanya via WhatsApp', 'Ask on WhatsApp')}
+        </a>
+      </div>
+    </aside>
+  )
+}
