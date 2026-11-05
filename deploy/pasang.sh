@@ -202,6 +202,23 @@ if ! npm ci; then
   npm ci || mati "npm ci tetap gagal. Cek pesan error di atas (sering karena build tools atau versi Node)."
 fi
 
+# sharp butuh binary native sesuai OS/arsitektur/libc. Kalau tidak termuat (gagal terunduh saat
+# npm ci, atau glibc VPS terlalu lama), payload migrate dan build akan crash. Uji lalu pasang ulang.
+info "Memeriksa sharp (pengolah gambar)"
+if node -e 'require("sharp")' >/dev/null 2>&1; then
+  ok "sharp termuat"
+else
+  warn "sharp tidak termuat. Memasang ulang binary sharp untuk platform ini."
+  rm -rf node_modules/sharp node_modules/@img
+  npm install sharp --include=optional --foreground-scripts >/dev/null 2>&1 || true
+  if node -e 'require("sharp")' >/dev/null 2>&1; then
+    ok "sharp OK setelah dipasang ulang"
+  else
+    echo; warn "Pesan asli sharp:"; node -e 'require("sharp")' 2>&1 | head -4 || true
+    mati "sharp tidak bisa jalan di VPS ini. Penyebab umum: glibc terlalu lama (butuh distro lebih baru, mis. Ubuntu 22.04+/Debian 12+). Alternatif: pasang libvips sistem (apt install libvips-dev) lalu: npm install --build-from-source sharp"
+  fi
+fi
+
 info "Menjalankan migrasi database"
 # Aman diulang: migrasi yang sudah pernah jalan dilewati. DB & skema dibuat kalau belum ada.
 NODE_ENV=production npx payload migrate
