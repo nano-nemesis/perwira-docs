@@ -128,7 +128,7 @@ Blog memakai `kategori` dan `terbitPada` sebagai pengganti `kode` dan `produk`. 
 
 ## Pasang di VPS
 
-Untuk VPS Linux dengan Node 22.23.4+ (atau 24.22.1+). Pakai script `deploy/pasang.sh`:
+Untuk VPS Linux dengan Node 22.23.4+ (atau 24.22.1+). sharp dipatok ke 0.33.5 agar tetap jalan di CPU VPS baseline (model qemu64/kvm64 tanpa SSE4.2); kalau CPU VM diset ke `host`, boleh naik ke sharp terbaru. Pakai script `deploy/pasang.sh`:
 script memeriksa spesifikasi (OS, versi Node, RAM, swap, disk), **memasang yang kurang** (Node lewat NodeSource/nvm, git, build tools bila perlu), meng-clone kode, membuat
 `.env` berikut `PAYLOAD_SECRET` acak, menjalankan migrasi database, build, lalu memasang
 systemd service. Jalankan sebagai root supaya service dan swap (kalau RAM kurang) ikut diurus.
