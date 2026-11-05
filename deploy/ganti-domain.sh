@@ -65,7 +65,11 @@ $BARU {
     encode gzip zstd
     # Sertifikat origin dari Cloudflare (SSL/TLS mode: Full strict)
     tls $CERT_DIR/origin.pem $CERT_DIR/origin.key
-    reverse_proxy 127.0.0.1:3000
+    reverse_proxy 127.0.0.1:3000 {
+        # timpa XFF dengan IP terverifikasi; XFF kiriman pengunjung ikut diteruskan Cloudflare
+        # dan bisa dipalsukan untuk membobol rate limit
+        header_up X-Forwarded-For {client_ip}
+    }
 }
 EOF
 else
@@ -77,7 +81,11 @@ $GLOBAL
 #   bash $APP_DIR/deploy/ganti-domain.sh <domain-baru>
 http://$BARU {
     encode gzip zstd
-    reverse_proxy 127.0.0.1:3000
+    reverse_proxy 127.0.0.1:3000 {
+        # timpa XFF dengan IP terverifikasi; XFF kiriman pengunjung ikut diteruskan Cloudflare
+        # dan bisa dipalsukan untuk membobol rate limit
+        header_up X-Forwarded-For {client_ip}
+    }
 }
 EOF
 fi
