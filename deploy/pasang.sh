@@ -29,10 +29,72 @@ warn()  { echo -e "${kuning}  !${nol} $*"; }
 mati()  { echo -e "${merah}  x${nol} $*" >&2; exit 1; }
 ada()   { command -v "$1" >/dev/null 2>&1; }
 
+# ----- pemasangan paket otomatis -----
+NODE_SERI="${NODE_SERI:-22}"            # seri Node yang dipasang kalau belum ada (22 = LTS; 24 juga boleh)
+
+# deteksi package manager distro
+PM=""
+if   ada apt-get; then PM=apt
+elif ada dnf;     then PM=dnf
+elif ada yum;     then PM=yum
+elif ada apk;     then PM=apk
+elif ada pacman;  then PM=pacman
+fi
+
+# jalankan perintah sebagai root (langsung kalau sudah root, pakai sudo kalau ada)
+sbg_root() {
+  if [ "$(id -u)" -eq 0 ]; then "$@"
+  elif ada sudo; then sudo "$@"
+  else mati "Butuh akses root untuk: $*. Jalankan script sebagai root atau pasang sudo."
+  fi
+}
+
+# pasang paket sistem lewat package manager yang terdeteksi
+pasang_paket() {
+  case "$PM" in
+    apt)    sbg_root apt-get update -y && sbg_root apt-get install -y "$@" ;;
+    dnf)    sbg_root dnf install -y "$@" ;;
+    yum)    sbg_root yum install -y "$@" ;;
+    apk)    sbg_root apk add --no-cache "$@" ;;
+    pacman) sbg_root pacman -Sy --noconfirm "$@" ;;
+    *)      return 1 ;;
+  esac
+}
+
+# pasang Node seri $NODE_SERI (NodeSource untuk apt/dnf/yum, bawaan distro untuk lainnya; nvm sebagai cadangan)
+pasang_node() {
+  info "Memasang Node ${NODE_SERI}.x"
+  case "$PM" in
+    apt)
+      curl -fsSL "https://deb.nodesource.com/setup_${NODE_SERI}.x" -o /tmp/nodesource.sh \
+        && sbg_root bash /tmp/nodesource.sh && sbg_root apt-get install -y nodejs && return 0 ;;
+    dnf|yum)
+      curl -fsSL "https://rpm.nodesource.com/setup_${NODE_SERI}.x" -o /tmp/nodesource.sh \
+        && sbg_root bash /tmp/nodesource.sh && pasang_paket nodejs && return 0 ;;
+    apk)     pasang_paket nodejs npm && return 0 ;;
+    pacman)  pasang_paket nodejs npm && return 0 ;;
+  esac
+  # cadangan: nvm (level user, tidak butuh root)
+  warn "Memasang Node lewat nvm (cadangan)."
+  export NVM_DIR="$HOME/.nvm"
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+  # shellcheck disable=SC1091
+  . "$NVM_DIR/nvm.sh"
+  nvm install "$NODE_SERI" && nvm alias default "$NODE_SERI"
+}
+
+node_cukup() {
+  ada node || return 1
+  local v m; v="$(node -p 'process.versions.node')"; m="${v%%.*}"
+  minimal_ok() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" = "$2" ]; }  # $1 >= $2 ?
+  [ "$m" -ge 25 ] || { [ "$m" -eq 24 ] && minimal_ok "$v" 24.22.1; } || { [ "$m" -eq 22 ] && minimal_ok "$v" 22.23.4; }
+}
+
 # =====================================================================
-# 1. Verifikasi spesifikasi VPS
+# 1. Verifikasi spesifikasi VPS (pasang yang kurang)
 # =====================================================================
 info "Memeriksa spesifikasi VPS"
+[ -n "$PM" ] && ok "Package manager: $PM" || warn "Package manager tak dikenal; Node/git dipasang lewat cara cadangan."
 
 [ "$(uname -s)" = "Linux" ] || mati "Script ini untuk Linux."
 ok "OS: $( (. /etc/os-release 2>/dev/null && echo "$PRETTY_NAME") || uname -sr)"
@@ -43,23 +105,24 @@ case "$arch" in
   *) warn "Arsitektur $arch belum teruji (sharp/Next mungkin tidak jalan)." ;;
 esac
 
-# Node
-if ada node; then
-  node_ver="$(node -p 'process.versions.node')"
-  node_mayor="${node_ver%%.*}"
-  # butuh 22.23.4+ (seri 22) atau 24.22.1+ (seri 24 ke atas), sesuai engines di package.json
-  minimal_ok() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" = "$2" ]; }  # $1 >= $2 ?
-  if   [ "$node_mayor" -ge 25 ]; then ok "Node $node_ver"
-  elif [ "$node_mayor" -eq 24 ] && minimal_ok "$node_ver" 24.22.1; then ok "Node $node_ver"
-  elif [ "$node_mayor" -eq 22 ] && minimal_ok "$node_ver" 22.23.4; then ok "Node $node_ver"
-  else mati "Node $node_ver terlalu lama. Butuh 22.23.4+ atau 24.22.1+. Pasang dari nodejs.org atau nvm."
-  fi
-else
-  mati "Node belum terpasang. Pasang Node ${NODE_MIN_MAYOR}+ dulu (nodejs.org / nvm / nodesource)."
-fi
+# curl & git: dipasang kalau belum ada
+for alat in curl git; do
+  if ada "$alat"; then ok "$alat terpasang"
+  else info "Memasang $alat"; pasang_paket "$alat" || mati "Gagal memasang $alat. Pasang manual lalu jalankan lagi."; ok "$alat terpasang"; fi
+done
 
-ada git || mati "git belum terpasang. Pasang: apt install git / dnf install git"
-ada npm || mati "npm belum terpasang (biasanya sepaket dengan Node)."
+# Node: pasang kalau belum ada / versinya kurang (butuh 22.23.4+ atau 24.22.1+, sesuai engines)
+if node_cukup; then
+  ok "Node $(node -p 'process.versions.node')"
+else
+  if ada node; then warn "Node $(node -p 'process.versions.node') terlalu lama, memasang yang lebih baru"; fi
+  pasang_node
+  ada nvm 2>/dev/null || { export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; }
+  hash -r
+  node_cukup || mati "Node masih di bawah syarat setelah pemasangan. Pasang manual Node ${NODE_SERI}.x dari nodejs.org, lalu jalankan lagi."
+  ok "Node $(node -p 'process.versions.node') terpasang"
+fi
+ada npm || mati "npm tidak ikut terpasang bersama Node. Periksa instalasi Node."
 
 # RAM + swap
 ram_mb=$(( $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024 ))
@@ -126,7 +189,18 @@ fi
 # 4. Dependency, migrasi database, build
 # =====================================================================
 info "Memasang dependency (npm ci)"
-npm ci
+# beberapa modul mungkin perlu dikompilasi; kalau gagal, pasang build tools lalu coba lagi sekali
+if ! npm ci; then
+  warn "npm ci gagal. Memasang build tools (compiler, make, python3) lalu mencoba lagi."
+  case "$PM" in
+    apt)         pasang_paket build-essential python3 || true ;;
+    dnf|yum)     pasang_paket gcc gcc-c++ make python3 || true ;;
+    apk)         pasang_paket build-base python3 || true ;;
+    pacman)      pasang_paket base-devel python || true ;;
+    *)           warn "Package manager tak dikenal; pasang compiler/make/python manual kalau masih gagal." ;;
+  esac
+  npm ci || mati "npm ci tetap gagal. Cek pesan error di atas (sering karena build tools atau versi Node)."
+fi
 
 info "Menjalankan migrasi database"
 # Aman diulang: migrasi yang sudah pernah jalan dilewati. DB & skema dibuat kalau belum ada.
