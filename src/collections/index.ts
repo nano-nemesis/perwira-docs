@@ -185,6 +185,8 @@ export const Docs: CollectionConfig = {
     review,
     { name: 'ringkasan', type: 'textarea', localized: true },
     video,
+    // urutan: penjelasan dulu, baru langkah-langkah (di form admin maupun di halaman publik)
+    { name: 'konten', type: 'richText', localized: true, label: 'Penjelasan' },
     {
       name: 'langkah',
       type: 'array',
@@ -196,7 +198,6 @@ export const Docs: CollectionConfig = {
         { name: 'perintah', type: 'code', admin: { language: 'shell', description: 'Perintah RouterOS (opsional).' } },
       ],
     },
-    { name: 'konten', type: 'richText', localized: true },
     ...fieldSeo('docs'),
   ],
 }

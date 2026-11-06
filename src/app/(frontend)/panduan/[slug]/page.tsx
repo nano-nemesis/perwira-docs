@@ -81,18 +81,19 @@ export default async function HalamanDocs({ params, searchParams }: Props) {
         {/* "Di halaman ini" dulu di kolom kanan; sekarang deretan chip yang tidak mengganggu bacaan */}
         <nav className="lompat-ke" aria-label={pilih(lang, 'Di halaman ini', 'On this page')}>
           <span className="redup">{pilih(lang, 'Di halaman ini:', 'On this page:')}</span>
-          {langkah.length > 0 && <a href="#langkah">{pilih(lang, `Langkah (${langkah.length})`, `Steps (${langkah.length})`)}</a>}
           {doc.konten && <a href="#penjelasan">{pilih(lang, 'Penjelasan', 'Details')}</a>}
+          {langkah.length > 0 && <a href="#langkah">{pilih(lang, `Langkah (${langkah.length})`, `Steps (${langkah.length})`)}</a>}
           <a href="#bantuan">{pilih(lang, 'Masih belum berhasil?', 'Still stuck?')}</a>
         </nav>
 
         {vid && <KotakVideo id={vid} judul={doc.judul} en={en} />}
-        {langkah.length > 0 && <DaftarLangkah kode={doc.kode} langkah={langkah} en={en} />}
+        {/* penjelasan dulu, baru langkah-langkah */}
         {doc.konten && (
           <section id="penjelasan">
             <Prosa data={doc.konten} en={en} />
           </section>
         )}
+        {langkah.length > 0 && <DaftarLangkah kode={doc.kode} langkah={langkah} en={en} />}
 
         <Masukan docId={doc.id} kode={doc.kode} judul={doc.judul} en={en} />
 
