@@ -191,7 +191,14 @@ main.artikel { width: min(calc(100% - 48px), 860px); }
 }
 .samping .bantuan { margin-top: auto; }
 .samping .samping-menu { margin-bottom: 24px; }
-.pilih-versi { width: 100%; height: 40px; padding: 0 12px; margin-bottom: 16px; border: 1px solid var(--garis); border-radius: 10px; background: var(--input); color: var(--tinta); font: inherit; font-weight: 500; }
+/* pemilih versi panduan (ala GitHub) di halaman docs */
+.versi-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: -8px 0 26px; font-size: 13.5px; }
+.versi-bar > .redup { font-weight: 500; }
+.pil-versi { padding: 4px 11px; border-radius: 999px; border: 1px solid var(--garis); background: var(--input); color: var(--redup); font-size: 12.5px; font-weight: 600; text-decoration: none; transition: border-color .15s, color .15s; }
+.pil-versi:hover { border-color: var(--tinta-biru); color: var(--tinta); }
+.pil-versi.aktif { background: var(--ubin-biru); border-color: transparent; color: var(--tinta-biru); }
+.versi-lama { display: flex; align-items: center; gap: 10px; padding: 12px 14px; margin-bottom: 20px; border: 1px solid var(--garis); border-left: 3px solid var(--tinta-oranye); border-radius: 10px; background: var(--ubin-oranye); color: var(--tinta); font-size: 14px; line-height: 1.5; }
+.versi-lama a { color: var(--tinta-oranye); font-weight: 600; white-space: nowrap; }
 .samping-menu { display: flex; flex-direction: column; gap: 2px; font-weight: 500; }
 .samping-item { display: flex; align-items: center; gap: 12px; height: 38px; padding: 0 12px; border-radius: 10px; cursor: pointer; list-style: none; transition: background 200ms ease; }
 .samping-item:hover { background: var(--kbd); }

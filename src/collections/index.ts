@@ -1,4 +1,4 @@
-import { APIError, type CollectionConfig, type Field } from 'payload'
+import { APIError, type CollectionConfig, type Field, type Where } from 'payload'
 import { admin, adminField, apakahAdmin, cegahPenulisTerbit, editor, login, penulis, terbitAtauLogin } from '../access'
 import { endpointFormat } from '../lib/format'
 
@@ -182,6 +182,21 @@ export const Docs: CollectionConfig = {
     },
     { name: 'produk', type: 'relationship', relationTo: 'produk', required: true, label: 'Kategori produk', admin: { position: 'sidebar' } },
     { name: 'urutan', type: 'number', defaultValue: 100, admin: { position: 'sidebar' } },
+    // Versi panduan (ala GitHub): tiap versi adalah halaman tersendiri. Versi lama tetap bisa dibuka.
+    { name: 'versi', type: 'text', defaultValue: '1.0', admin: { position: 'sidebar', description: 'Nomor versi panduan ini, mis. 1.0 atau 2.0. Nomor tertinggi otomatis jadi versi terbaru.' } },
+    {
+      name: 'induk',
+      type: 'relationship',
+      relationTo: 'docs',
+      label: 'Versi dari',
+      // hanya boleh menunjuk panduan versi pertama (yang belum punya induk), dan bukan dirinya sendiri
+      filterOptions: ({ id }) => {
+        const kondisi: Where[] = [{ induk: { exists: false } }]
+        if (id) kondisi.push({ id: { not_equals: id } })
+        return { and: kondisi }
+      },
+      admin: { position: 'sidebar', description: 'Kosongkan kalau ini panduan baru. Isi dengan panduan versi pertama kalau ini versi baru dari panduan yang sudah ada.' },
+    },
     review,
     { name: 'ringkasan', type: 'textarea', localized: true },
     video,

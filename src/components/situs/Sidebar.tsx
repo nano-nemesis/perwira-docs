@@ -1,26 +1,26 @@
 import Link from 'next/link'
 import { ambilProduk, getPayload, publik } from '@/lib/payload'
 import { pilih, tautan, tautanWa, type Lang } from '@/lib/situs'
+import { hanyaTerbaru } from '@/lib/versi'
 import { Ikon } from './Ikon'
 
 export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
   const payload = await getPayload()
   const produk = await ambilProduk(lang)
-  const { docs } = await payload.find({
+  const { docs: semua } = await payload.find({
     collection: 'docs',
     locale: lang,
     limit: 200,
     depth: 0,
     sort: 'urutan',
-    select: { judul: true, slug: true, produk: true },
+    select: { judul: true, slug: true, produk: true, versi: true, induk: true },
     ...publik,
   })
+  // di menu hanya tampilkan versi terbaru tiap panduan; versi lama dibuka dari halaman panduannya
+  const docs = hanyaTerbaru(semua)
 
   return (
     <aside className="samping" aria-label={pilih(lang, 'Navigasi dokumentasi', 'Documentation navigation')}>
-      <select aria-label={pilih(lang, 'Versi dokumentasi', 'Docs version')} className="pilih-versi" defaultValue="1">
-        <option value="1">v1.0 ({pilih(lang, 'Terbaru', 'Latest')})</option>
-      </select>
       <nav className="samping-menu">
         <Link href={tautan(lang, '/')} className="samping-item">
           <Ikon nama="rumah" /> {pilih(lang, 'Beranda', 'Home')}

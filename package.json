@@ -14,7 +14,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation payload run src/seed.ts",
-    "cek": "node --test src/lib/duafa.test.ts src/lib/markdown.test.ts src/lib/cari.test.ts"
+    "cek": "node --test src/lib/duafa.test.ts src/lib/markdown.test.ts src/lib/cari.test.ts src/lib/versi.test.ts"
   },
   "dependencies": {
     "@payloadcms/db-sqlite": "3.93.0",

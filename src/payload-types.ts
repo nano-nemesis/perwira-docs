@@ -157,6 +157,14 @@ export interface Doc {
   produk: number | Produk;
   urutan?: number | null;
   /**
+   * Nomor versi panduan ini, mis. 1.0 atau 2.0. Nomor tertinggi otomatis jadi versi terbaru.
+   */
+  versi?: string | null;
+  /**
+   * Kosongkan kalau ini panduan baru. Isi dengan panduan versi pertama kalau ini versi baru dari panduan yang sudah ada.
+   */
+  induk?: (number | null) | Doc;
+  /**
    * Penulis mencentang ini, editor yang menerbitkan.
    */
   perluReview?: boolean | null;
@@ -165,17 +173,6 @@ export interface Doc {
    * Tautan YouTube (opsional). Kosongkan kalau tidak ada video, kotaknya otomatis tidak tampil.
    */
   video?: string | null;
-  langkah?:
-    | {
-        judul: string;
-        isi?: string | null;
-        /**
-         * Perintah RouterOS (opsional).
-         */
-        perintah?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   konten?: {
     root: {
       type: string;
@@ -191,6 +188,17 @@ export interface Doc {
     };
     [k: string]: unknown;
   } | null;
+  langkah?:
+    | {
+        judul: string;
+        isi?: string | null;
+        /**
+         * Perintah RouterOS (opsional).
+         */
+        perintah?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Kata atau frasa utama yang ingin diperingkat di Google. Dasar analisis Yoast di bawah.
    */
@@ -628,9 +636,12 @@ export interface DocsSelect<T extends boolean = true> {
   kode?: T;
   produk?: T;
   urutan?: T;
+  versi?: T;
+  induk?: T;
   perluReview?: T;
   ringkasan?: T;
   video?: T;
+  konten?: T;
   langkah?:
     | T
     | {
@@ -639,7 +650,6 @@ export interface DocsSelect<T extends boolean = true> {
         perintah?: T;
         id?: T;
       };
-  konten?: T;
   fokusKeyphrase?: T;
   meta?:
     | T

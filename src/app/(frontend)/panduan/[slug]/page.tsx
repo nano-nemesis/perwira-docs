@@ -9,6 +9,7 @@ import { Ikon } from '@/components/situs/Ikon'
 import { Sidebar } from '@/components/situs/Sidebar'
 import { alihkanAtau404 } from '@/lib/pengalih'
 import { getPayload, publik } from '@/lib/payload'
+import { grupVersi, hanyaTerbaru, lebihBaru } from '@/lib/versi'
 import { SITUS, bahasa, idYoutube, pilih, tanggal, tautan, tautanWa, type Lang } from '@/lib/situs'
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }
@@ -21,15 +22,34 @@ const ambil = cache(async (slug: string, lang: Lang) => {
   return docs[0]
 })
 
+// semua versi satu panduan (grup = induk atau dirinya sendiri), diurut terbaru dulu
+const ambilVersi = cache(async (grup: number | string, lang: Lang, draf: boolean) => {
+  const payload = await getPayload()
+  const { docs } = await payload.find({
+    collection: 'docs',
+    locale: lang,
+    where: { or: [{ id: { equals: grup } }, { induk: { equals: grup } }] },
+    limit: 50,
+    depth: 0,
+    select: { judul: true, slug: true, versi: true, induk: true },
+    ...(draf ? { draft: true, overrideAccess: true } : publik),
+  })
+  const urut = [...docs].sort((a, b) => (lebihBaru(a.versi, b.versi) ? -1 : 1))
+  return { daftar: urut, terbaru: urut[0] ?? null }
+})
+
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const [{ slug }, sp] = await Promise.all([params, searchParams])
   const doc = await ambil(slug, bahasa(sp))
   if (!doc) return {}
   const url = `/panduan/${slug}`
+  // versi lama: canonical diarahkan ke versi terbaru supaya tidak dianggap konten duplikat oleh Google
+  const { terbaru } = await ambilVersi(grupVersi(doc), bahasa(sp), (await draftMode()).isEnabled)
+  const kanon = terbaru && terbaru.id !== doc.id ? `/panduan/${terbaru.slug}` : url
   return {
     title: doc.meta?.title || doc.judul,
     description: doc.meta?.description || doc.ringkasan || undefined,
-    alternates: { canonical: bahasa(sp) === 'en' ? `${url}?lang=en` : url, languages: { id: url, en: `${url}?lang=en` } },
+    alternates: { canonical: bahasa(sp) === 'en' ? `${kanon}?lang=en` : kanon, languages: { id: url, en: `${url}?lang=en` } },
     openGraph: { type: 'article', title: doc.judul, description: doc.ringkasan || undefined },
   }
 }
@@ -44,8 +64,16 @@ export default async function HalamanDocs({ params, searchParams }: Props) {
   const produk = typeof doc.produk === 'object' ? doc.produk : null
   const vid = idYoutube(doc.video)
   const langkah = doc.langkah ?? []
+  const grup = grupVersi(doc)
+  const { daftar: versiLain, terbaru } = await ambilVersi(grup, lang, (await draftMode()).isEnabled)
+  const versiLama = terbaru != null && terbaru.id !== doc.id
+  // panduan lain di produk yang sama: hanya versi terbaru, dan bukan versi lain dari panduan ini
   const lain = produk
-    ? (await (await getPayload()).find({ collection: 'docs', locale: lang, where: { produk: { equals: produk.id }, slug: { not_equals: doc.slug } }, sort: 'urutan', limit: 5, depth: 0, select: { judul: true, slug: true, kode: true }, ...publik })).docs
+    ? hanyaTerbaru(
+        (await (await getPayload()).find({ collection: 'docs', locale: lang, where: { produk: { equals: produk.id } }, sort: 'urutan', limit: 20, depth: 0, select: { judul: true, slug: true, kode: true, versi: true, induk: true }, ...publik })).docs,
+      )
+        .filter((d) => grupVersi(d) !== grup)
+        .slice(0, 5)
     : []
   // schema.org HowTo dan VideoObject untuk hasil pencarian Google
   const schema = {
@@ -78,6 +106,26 @@ export default async function HalamanDocs({ params, searchParams }: Props) {
           <span className={`pil ${produk?.warna ?? 'biru'}`}>{pilih(lang, 'Kode', 'Code')} {doc.kode}</span>
           <span className="pil abu">{pilih(lang, 'Diperbarui', 'Updated')} {tanggal(doc.updatedAt, lang)}</span>
         </div>
+        {versiLain.length > 1 && (
+          <div className="versi-bar" role="group" aria-label={pilih(lang, 'Versi panduan', 'Guide versions')}>
+            <Ikon nama="jam" ukuran={16} />
+            <span className="redup">{pilih(lang, 'Versi:', 'Version:')}</span>
+            {versiLain.map((v) => (
+              <Link key={v.id} href={tautan(lang, `/panduan/${v.slug}`)} className={`pil-versi${v.id === doc.id ? ' aktif' : ''}`} aria-current={v.id === doc.id ? 'true' : undefined}>
+                v{v.versi || '1.0'}{terbaru && v.id === terbaru.id ? ` · ${pilih(lang, 'Terbaru', 'Latest')}` : ''}
+              </Link>
+            ))}
+          </div>
+        )}
+        {versiLama && terbaru && (
+          <div className="versi-lama" role="note">
+            <Ikon nama="info" ukuran={18} />
+            <span>
+              {pilih(lang, `Kamu melihat versi lama (v${doc.versi || '1.0'}). `, `You're viewing an old version (v${doc.versi || '1.0'}). `)}
+              <Link href={tautan(lang, `/panduan/${terbaru.slug}`)}>{pilih(lang, `Buka versi terbaru (v${terbaru.versi})`, `Open the latest version (v${terbaru.versi})`)}</Link>
+            </span>
+          </div>
+        )}
         {/* "Di halaman ini" dulu di kolom kanan; sekarang deretan chip yang tidak mengganggu bacaan */}
         <nav className="lompat-ke" aria-label={pilih(lang, 'Di halaman ini', 'On this page')}>
           <span className="redup">{pilih(lang, 'Di halaman ini:', 'On this page:')}</span>
