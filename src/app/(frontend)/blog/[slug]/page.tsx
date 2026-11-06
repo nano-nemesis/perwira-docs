@@ -1,6 +1,8 @@
+import { Pratinjau } from '@/components/situs/Pratinjau'
 import { Prosa } from '@/components/situs/Prosa'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import { KotakVideo } from '@/components/situs/Interaktif'
 import { alihkanAtau404 } from '@/lib/pengalih'
@@ -10,8 +12,9 @@ import { SITUS, bahasa, idYoutube, pilih, tanggal, tautan, type Lang } from '@/l
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }
 
 const ambil = cache(async (slug: string, lang: Lang) => {
+  const draf = (await draftMode()).isEnabled
   const payload = await getPayload()
-  const p = (await payload.find({ collection: 'posts', locale: lang, where: { slug: { equals: slug } }, limit: 1, depth: 1, ...publik })).docs[0]
+  const p = (await payload.find({ collection: 'posts', locale: lang, where: { slug: { equals: slug } }, limit: 1, depth: 1, ...(draf ? { draft: true, overrideAccess: true } : publik) })).docs[0]
   if (!p) return undefined
   // byline penulis memang publik, tapi koleksi Users tertutup untuk pengunjung (publik), jadi ambil namanya saja
   const idPenulis = typeof p.penulis === 'object' ? p.penulis?.id : p.penulis
@@ -55,6 +58,7 @@ export default async function Artikel({ params, searchParams }: Props) {
 
   return (
     <main className="lebar artikel">
+      {(await draftMode()).isEnabled && <Pratinjau kembali={`/tuan/collections/posts/${p.id}`} />}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
       <nav aria-label="Breadcrumb" className="remah">
         <Link href={tautan(lang, '/')}>{pilih(lang, 'Beranda', 'Home')}</Link>

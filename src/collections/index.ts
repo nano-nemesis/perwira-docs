@@ -110,6 +110,10 @@ const review: Field = {
 const aksesKonten = { read: terbitAtauLogin, create: penulis, update: penulis, delete: editor }
 
 /** Impor (di atas daftar) dan ekspor .md/.html/.json/brief video (di bar simpan). Logikanya di src/lib/format.ts. */
+/** URL tombol Preview di admin: buka /preview yang menyalakan draft mode (cek sesi admin di route). */
+const pratinjau = (koleksi: 'docs' | 'posts') => (doc: Record<string, unknown>, { locale }: { locale?: string }) =>
+  doc?.slug ? `/preview?collection=${koleksi}&slug=${doc.slug}${locale === 'en' ? '&lang=en' : ''}` : null
+
 const tombolFormat = (koleksi: 'docs' | 'posts') => ({
   beforeListTable: [{ path: '/components/admin/Format#Impor', clientProps: { koleksi } }],
   edit: { beforeDocumentControls: ['/components/admin/Format#Ekspor'] },
@@ -155,7 +159,7 @@ export const Produk: CollectionConfig = {
 export const Docs: CollectionConfig = {
   slug: 'docs',
   labels: { singular: 'Halaman docs', plural: 'Halaman docs' },
-  admin: { useAsTitle: 'judul', defaultColumns: ['kode', 'judul', 'produk', '_status', 'updatedAt'], group: 'Konten', components: tombolFormat('docs') },
+  admin: { useAsTitle: 'judul', defaultColumns: ['kode', 'judul', 'produk', '_status', 'updatedAt'], group: 'Konten', components: tombolFormat('docs'), preview: pratinjau('docs') },
   access: aksesKonten,
   endpoints: endpointFormat('docs'),
   versions: versi,
@@ -193,7 +197,7 @@ export const Docs: CollectionConfig = {
 export const Posts: CollectionConfig = {
   slug: 'posts',
   labels: { singular: 'Tulisan blog', plural: 'Tulisan blog' },
-  admin: { useAsTitle: 'judul', defaultColumns: ['judul', 'kategori', '_status', 'terbitPada'], group: 'Konten', components: tombolFormat('posts') },
+  admin: { useAsTitle: 'judul', defaultColumns: ['judul', 'kategori', '_status', 'terbitPada'], group: 'Konten', components: tombolFormat('posts'), preview: pratinjau('posts') },
   access: aksesKonten,
   endpoints: endpointFormat('posts'),
   versions: versi,

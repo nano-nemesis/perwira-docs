@@ -1,6 +1,8 @@
+import { Pratinjau } from '@/components/situs/Pratinjau'
 import { Prosa } from '@/components/situs/Prosa'
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import { DaftarLangkah, KotakVideo, Masukan } from '@/components/situs/Interaktif'
 import { Ikon } from '@/components/situs/Ikon'
@@ -12,8 +14,10 @@ import { SITUS, bahasa, idYoutube, pilih, tanggal, tautan, tautanWa, type Lang }
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }
 
 const ambil = cache(async (slug: string, lang: Lang) => {
+  // mode pratinjau (admin lewat tombol Preview) menampilkan draf; publik tetap hanya yang terbit
+  const draf = (await draftMode()).isEnabled
   const payload = await getPayload()
-  const { docs } = await payload.find({ collection: 'docs', locale: lang, where: { slug: { equals: slug } }, limit: 1, depth: 1, ...publik })
+  const { docs } = await payload.find({ collection: 'docs', locale: lang, where: { slug: { equals: slug } }, limit: 1, depth: 1, ...(draf ? { draft: true, overrideAccess: true } : publik) })
   return docs[0]
 })
 
@@ -59,6 +63,7 @@ export default async function HalamanDocs({ params, searchParams }: Props) {
     <div className="dua-kolom">
       <Sidebar lang={lang} aktif={doc.slug} />
       <main className="tengah">
+        {(await draftMode()).isEnabled && <Pratinjau kembali={`/tuan/collections/docs/${doc.id}`} />}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, '\\u003c') }} />
         <nav aria-label="Breadcrumb" className="remah">
           <Link href={tautan(lang, '/')}>{pilih(lang, 'Beranda', 'Home')}</Link>

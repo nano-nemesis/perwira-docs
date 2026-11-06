@@ -507,3 +507,12 @@ html.kunci-gulir { overflow: hidden; }
 @keyframes lembar-naik { from { transform: translateY(100%); } }
 @media (min-width: 901px) { .tombol-menu { display: none; } .kepala-lebar { display: contents; } }
 @media (prefers-reduced-motion: reduce) { .spot, .spot-latar, .lembar, .lembar-latar { animation: none; } }
+
+/* Bar pratinjau draf (Pratinjau.tsx) */
+.pratinjau {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 16px; margin-bottom: 22px;
+  border: 1px solid var(--awas-garis, #ffd9a8); border-radius: 12px; background: var(--awas, #fff4e6);
+  font-size: 14px; color: var(--tombol-oranye-tinta, #b35600);
+}
+.pratinjau a { font-weight: 700; color: var(--tombol-oranye-tinta, #b35600); text-decoration: underline; white-space: nowrap; }
