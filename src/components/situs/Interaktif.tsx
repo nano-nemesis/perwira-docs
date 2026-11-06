@@ -37,6 +37,10 @@ export function DaftarLangkah({ kode, langkah, en }: { kode: string; langkah: La
           {en ? `${jumlah} of ${langkah.length} done` : `${jumlah} dari ${langkah.length} selesai`}
         </span>
       </div>
+      <p className="langkah-petunjuk redup">
+        <Ikon nama="centang" ukuran={15} />
+        {en ? 'Tap the number on each step to check it off as you go. Your progress is saved on this device.' : 'Ketuk nomor di tiap langkah untuk menandainya selesai. Progresmu tersimpan di perangkat ini.'}
+      </p>
       <ol className="langkah">
         {langkah.map((l, i) => (
           <li key={i} className="kartu">
@@ -44,10 +48,12 @@ export function DaftarLangkah({ kode, langkah, en }: { kode: string; langkah: La
               type="button"
               className={selesai[i] ? 'nomor beres' : 'nomor'}
               aria-pressed={selesai[i]}
-              aria-label={`${en ? 'Mark step' : 'Tandai langkah'} ${i + 1}`}
+              aria-label={`${en ? 'Mark step' : 'Tandai langkah'} ${i + 1}${selesai[i] ? (en ? ' (done)' : ' (selesai)') : ''}`}
+              title={en ? 'Click to mark done' : 'Klik untuk tandai selesai'}
               onClick={() => ubah(i)}
             >
-              {selesai[i] ? <Ikon nama="centang" ukuran={16} /> : i + 1}
+              <span className="nomor-angka">{i + 1}</span>
+              <Ikon nama="centang" ukuran={16} />
             </button>
             <div>
               <p className="langkah-judul">{l.judul}</p>
