@@ -109,6 +109,12 @@ const review: Field = {
 
 const aksesKonten = { read: terbitAtauLogin, create: penulis, update: penulis, delete: editor }
 
+/** Kata kunci fokus + panel analisis SEO (mesin Yoast) di halaman edit docs/blog. */
+const fieldSeo = (jenis: 'docs' | 'posts'): Field[] => [
+  { name: 'fokusKeyphrase', type: 'text', label: 'Kata kunci fokus (SEO)', admin: { description: 'Kata atau frasa utama yang ingin diperingkat di Google. Dasar analisis Yoast di bawah.' } },
+  { name: 'analisisSeo', type: 'ui', admin: { components: { Field: { path: '/components/admin/AnalisisSeo#AnalisisSeo', clientProps: { jenis } } } } },
+]
+
 /** Impor (di atas daftar) dan ekspor .md/.html/.json/brief video (di bar simpan). Logikanya di src/lib/format.ts. */
 /** URL tombol Preview di admin: buka /preview yang menyalakan draft mode (cek sesi admin di route). */
 const pratinjau = (koleksi: 'docs' | 'posts') => (doc: Record<string, unknown>, { locale }: { locale?: string }) =>
@@ -191,6 +197,7 @@ export const Docs: CollectionConfig = {
       ],
     },
     { name: 'konten', type: 'richText', localized: true },
+    ...fieldSeo('docs'),
   ],
 }
 
@@ -213,6 +220,7 @@ export const Posts: CollectionConfig = {
     { name: 'sampul', type: 'upload', relationTo: 'media' },
     video,
     { name: 'konten', type: 'richText', localized: true },
+    ...fieldSeo('posts'),
   ],
 }
 

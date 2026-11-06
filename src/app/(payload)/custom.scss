@@ -749,3 +749,31 @@ html[data-theme='dark'] .field-label .localized::after { color: #8fbbff; }
 .status__action { margin-left: 10px; }
 /* pemisah nomor halaman di daftar panjang */
 .paginator__separator { font-size: 0; &::after { content: '…'; font-size: 1rem; } }
+
+/* Panel analisis SEO (AnalisisSeo.tsx, mesin Yoast) */
+.pm-seo {
+  margin-top: 8px; padding: 16px 18px; border-radius: 16px;
+  background: var(--pm-kartu); box-shadow: $pm-25d-kecil;
+  h4 { margin: 0; font: 700 15px 'Plus Jakarta Sans', var(--font-body); }
+  h5 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--theme-elevation-500); }
+  .pm-seo-atas { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .pm-seo-ket { margin: 2px 0 0; font-size: 12px; color: var(--theme-elevation-500); }
+  .pm-seo-galat { margin: 10px 0 0; color: #e5484d; font-size: 13px; }
+
+  .pm-seo-skor { display: flex; align-items: center; gap: 14px; margin: 16px 0 4px; }
+  .pm-seo-angka {
+    width: 60px; height: 60px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font: 800 22px 'Plus Jakarta Sans', var(--font-body); color: #fff;
+    &.baik { background: linear-gradient(145deg, #4fd38a, #13994b); }
+    &.cukup { background: linear-gradient(145deg, #ffcf6b, #f59e0b); background: linear-gradient(145deg, #ffcf6b, #f59e0b); }
+    &.buruk { background: linear-gradient(145deg, #f2787d, #e5484d); }
+  }
+  .pm-seo-skor-ket { display: grid; font-weight: 700; small { font-weight: 500; color: var(--theme-elevation-500); } }
+
+  .pm-seo-grup ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+  .pm-seo-grup li { display: grid; grid-template-columns: auto 1fr; gap: 9px; align-items: start; font-size: 13px; line-height: 1.5; }
+  .pm-seo-titik { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; flex: none; }
+  li.baik .pm-seo-titik { background: #13994b; }
+  li.cukup .pm-seo-titik { background: #f59e0b; }
+  li.buruk .pm-seo-titik { background: #e5484d; }
+}

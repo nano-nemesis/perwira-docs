@@ -44,6 +44,30 @@ export default buildConfig({
     fallback: true,
   },
   collections: [Docs, Posts, Produk, Updates, Media, PencarianGagal, Masukan, Users],
+  endpoints: [
+    {
+      // Analisis SEO (mesin Yoast) untuk panel di admin. Hanya untuk pengguna admin yang sudah login.
+      path: '/seo-analisis',
+      method: 'post',
+      handler: async (req) => {
+        if (!req.user) return Response.json({ galat: 'Login dulu.' }, { status: 401 })
+        const b = (await req.json?.()) ?? {}
+        const { analisisSeo } = await import('./lib/seo')
+        const { convertLexicalToHTML } = await import('@payloadcms/richtext-lexical/html')
+        const esc = (x: unknown) => String(x ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string)
+        let html = b.ringkasan ? `<p>${esc(b.ringkasan)}</p>` : ''
+        for (const l of (b.langkah ?? []) as { judul?: string; isi?: string; perintah?: string }[]) {
+          html += `<h2>${esc(l.judul)}</h2>`
+          if (l.isi) html += `<p>${esc(l.isi)}</p>`
+          if (l.perintah) html += `<pre>${esc(l.perintah)}</pre>`
+        }
+        if (b.konten?.root)
+          html += convertLexicalToHTML({ data: b.konten, disableContainer: true, converters: ({ defaultConverters }) => ({ ...defaultConverters, blocks: { Code: ({ node }: { node: unknown }) => `<pre>${esc((node as { fields?: { code?: string } }).fields?.code)}</pre>` } }) })
+        const hasil = await analisisSeo({ keyphrase: b.fokusKeyphrase || '', title: b.title || '', description: b.description || '', slug: b.slug || '', permalink: `${situs}/${b.jenis === 'docs' ? 'panduan' : 'blog'}/${b.slug || ''}`, html, locale: b.locale })
+        return Response.json(hasil)
+      },
+    },
+  ],
   // Markdown: pintasan ketik bawaan Lexical + blok kode ``` (impor/ekspor Markdown dua arah, lihat src/lib/format.ts)
   editor: lexicalEditor({
     // toolbar tetap di atas kotak tulis supaya tombol format (judul, tebal, daftar, kode) selalu kelihatan

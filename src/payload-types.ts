@@ -191,6 +191,10 @@ export interface Doc {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Kata atau frasa utama yang ingin diperingkat di Google. Dasar analisis Yoast di bawah.
+   */
+  fokusKeyphrase?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -290,6 +294,10 @@ export interface Post {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Kata atau frasa utama yang ingin diperingkat di Google. Dasar analisis Yoast di bawah.
+   */
+  fokusKeyphrase?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -632,6 +640,7 @@ export interface DocsSelect<T extends boolean = true> {
         id?: T;
       };
   konten?: T;
+  fokusKeyphrase?: T;
   meta?:
     | T
     | {
@@ -658,6 +667,7 @@ export interface PostsSelect<T extends boolean = true> {
   sampul?: T;
   video?: T;
   konten?: T;
+  fokusKeyphrase?: T;
   meta?:
     | T
     | {
