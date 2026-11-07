@@ -288,7 +288,7 @@ export const Media: CollectionConfig = {
           () => true,
           () => false,
         )
-        if (!ada) return new Response('Not found', { status: 404 })
+        if (!ada) throw new APIError('Not found', 404)
       },
     ],
   },
