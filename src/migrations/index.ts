@@ -3,6 +3,7 @@ import * as migration_20261106_111854_tambah_fokus_keyphrase from './20261106_11
 import * as migration_20261106_115349_tambah_versi_induk from './20261106_115349_tambah_versi_induk';
 import * as migration_20261107_071449_gambar_langkah from './20261107_071449_gambar_langkah';
 import * as migration_20261107_085316_merek_produk from './20261107_085316_merek_produk';
+import * as migration_20261107_180000_tanpa_2fa from './20261107_180000_tanpa_2fa';
 
 export const migrations = [
   {
@@ -28,6 +29,11 @@ export const migrations = [
   {
     up: migration_20261107_085316_merek_produk.up,
     down: migration_20261107_085316_merek_produk.down,
-    name: '20261107_085316_merek_produk'
+    name: '20261107_085316_merek_produk',
+  },
+  {
+    up: migration_20261107_180000_tanpa_2fa.up,
+    down: migration_20261107_180000_tanpa_2fa.down,
+    name: '20261107_180000_tanpa_2fa',
   },
 ];

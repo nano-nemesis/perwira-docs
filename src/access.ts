@@ -1,16 +1,17 @@
 import type { Access, CollectionBeforeChangeHook, FieldAccess, PayloadRequest } from 'payload'
 import { APIError } from 'payload'
-import { sesiTerverifikasi } from './lib/duafa'
+import { bolehTanpa2fa, sesiTerverifikasi } from './lib/duafa'
 
-type Pengguna = { id?: number | string; role?: string | null; twoFactorEnabled?: boolean | null } | null | undefined
+type Pengguna = { id?: number | string; role?: string | null; twoFactorEnabled?: boolean | null; tanpa2fa?: boolean | null } | null | undefined
 
 /**
  * 2FA wajib: akun harus sudah mengaktifkan 2FA DAN sesi ini sudah lolos kode 2FA
  * (cookie pm-2fa). Tanpa itu, tidak bisa menulis apa pun lewat admin maupun REST API.
+ * Pengecualian: akun yang dibebaskan admin (tanpa2fa) mendapat cookie pm-2fa lewat /lewati-2fa.
  */
 const punya = (req: PayloadRequest, izin: string[]) => {
   const u = req.user as Pengguna
-  return !!u?.twoFactorEnabled && izin.includes(u.role ?? '') && sesiTerverifikasi(req.headers?.get('cookie'))
+  return (!!u?.twoFactorEnabled || bolehTanpa2fa(u)) && izin.includes(u?.role ?? '') && sesiTerverifikasi(req.headers?.get('cookie'))
 }
 
 export const apakahAdmin = (req: PayloadRequest) => punya(req, ['admin'])

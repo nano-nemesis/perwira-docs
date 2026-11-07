@@ -33,7 +33,7 @@ export const Users: CollectionConfig = {
       generateEmailHTML: (args) => emailReset(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/tuan/reset/${args?.token}`),
     },
   },
-  admin: { useAsTitle: 'email', defaultColumns: ['name', 'email', 'role', 'twoFactorEnabled'], group: 'Akun' },
+  admin: { useAsTitle: 'email', defaultColumns: ['name', 'email', 'role', 'twoFactorEnabled', 'tanpa2fa'], group: 'Akun' },
   access: {
     read: login,
     create: admin,
@@ -78,6 +78,14 @@ export const Users: CollectionConfig = {
       defaultValue: false,
       access: { create: () => false, update: adminField },
       admin: { description: 'Diaktifkan sendiri oleh pengguna di /verifikasi-2fa. Admin bisa mematikannya untuk mereset 2FA.' },
+    },
+    {
+      name: 'tanpa2fa',
+      type: 'checkbox',
+      label: 'Boleh tanpa 2FA',
+      defaultValue: false,
+      access: { create: adminField, update: adminField },
+      admin: { description: 'Akun ini masuk cukup dengan email + password, tanpa kode 2FA. Berlaku untuk semua peran.' },
     },
     { name: 'totpSecret', type: 'text', admin: tersembunyi, access: { read: () => false, create: () => false, update: () => false } },
     { name: 'kodeCadangan', type: 'json', admin: tersembunyi, access: { read: () => false, create: () => false, update: () => false } },

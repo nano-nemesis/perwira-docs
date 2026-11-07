@@ -2,7 +2,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import QRCode from 'qrcode'
-import { buatRahasia, uriOtpauth } from '@/lib/duafa'
+import { bolehTanpa2fa, buatRahasia, uriOtpauth } from '@/lib/duafa'
 import { getPayload } from '@/lib/payload'
 import { Formulir } from './Formulir'
 
@@ -13,6 +13,8 @@ export default async function Verifikasi2FA({ searchParams }: { searchParams: Pr
   const payload = await getPayload()
   const { user } = await payload.auth({ headers: await headers() })
   if (!user) redirect('/tuan/login')
+  // akun yang dibebaskan admin: lewati kode, cookie sesi 2FA dipasang di /lewati-2fa
+  if (bolehTanpa2fa(user)) redirect(`/lewati-2fa?lanjut=${encodeURIComponent(lanjut)}`)
 
   const aktif = !!user.twoFactorEnabled
   // akun baru: buat rahasia di sini, baru disimpan setelah kode pertama benar

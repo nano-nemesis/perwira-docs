@@ -53,6 +53,9 @@ export const hashKode = (k: string) => createHash('sha256').update(k.replace(/[^
 /** Nilai cookie pm-2fa: HMAC dari token sesi Payload, jadi ikut mati saat logout. */
 export const tandaSesi = (token: string) => createHmac('sha256', process.env.PAYLOAD_SECRET || '').update(token).digest('hex')
 
+/** Akun yang dibebaskan admin dari 2FA (field tanpa2fa), berlaku untuk semua peran termasuk admin. */
+export const bolehTanpa2fa = (u: { role?: string | null; tanpa2fa?: boolean | null } | null | undefined) => !!u?.tanpa2fa
+
 export function sesiTerverifikasi(cookie: string | null | undefined) {
   if (!cookie) return false
   const ambil = (n: string) => cookie.match(new RegExp(`(?:^|;\\s*)${n}=([^;]+)`))?.[1]

@@ -357,6 +357,10 @@ export interface User {
    * Diaktifkan sendiri oleh pengguna di /verifikasi-2fa. Admin bisa mematikannya untuk mereset 2FA.
    */
   twoFactorEnabled?: boolean | null;
+  /**
+   * Akun ini masuk cukup dengan email + password, tanpa kode 2FA. Berlaku untuk semua peran.
+   */
+  tanpa2fa?: boolean | null;
   totpSecret?: string | null;
   kodeCadangan?:
     | {
@@ -796,6 +800,7 @@ export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
   twoFactorEnabled?: T;
+  tanpa2fa?: T;
   totpSecret?: T;
   kodeCadangan?: T;
   gagal2fa?: T;

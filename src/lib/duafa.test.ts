@@ -1,7 +1,7 @@
 // Jalankan: npm run cek
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { buatKodeCadangan, buatRahasia, cocokTotp, hashKode, kodeTotp, sesiTerverifikasi, tandaSesi } from './duafa.ts'
+import { bolehTanpa2fa, buatKodeCadangan, buatRahasia, cocokTotp, hashKode, kodeTotp, sesiTerverifikasi, tandaSesi } from './duafa.ts'
 
 test('TOTP cocok dengan test vector RFC 6238 (T=59, SHA1)', () => {
   // rahasia ASCII "12345678901234567890" dalam base32
@@ -28,4 +28,13 @@ test('cookie 2FA terikat ke token sesi', () => {
   assert.ok(sesiTerverifikasi(ok))
   assert.ok(!sesiTerverifikasi(`payload-token=lain; pm-2fa=${tandaSesi('abc')}`))
   assert.ok(!sesiTerverifikasi('payload-token=abc'))
+})
+
+test('bebas 2FA berlaku untuk semua peran yang dicentang admin', () => {
+  assert.ok(bolehTanpa2fa({ role: 'penulis', tanpa2fa: true }))
+  assert.ok(bolehTanpa2fa({ role: 'editor', tanpa2fa: true }))
+  assert.ok(bolehTanpa2fa({ role: 'admin', tanpa2fa: true }))
+  assert.ok(!bolehTanpa2fa({ role: 'penulis', tanpa2fa: false }))
+  assert.ok(!bolehTanpa2fa({ role: 'editor' }))
+  assert.ok(!bolehTanpa2fa(null))
 })
