@@ -66,12 +66,14 @@ export default buildConfig({
           n?.children?.forEach(kumpul)
         }
         kumpul(b.konten?.root)
+        if (idMedia(b.sampul)) ids.add(idMedia(b.sampul) as number)
         const media = ids.size ? (await req.payload.find({ collection: 'media', where: { id: { in: [...ids] } }, limit: ids.size, depth: 0, locale: b.locale })).docs : []
         const img = (v: unknown) => {
           const m = media.find((x) => x.id === idMedia(v))
           return m ? `<img src="${esc(m.url)}" alt="${esc(m.alt)}">` : ''
         }
-        let html = b.ringkasan ? `<p>${esc(b.ringkasan)}</p>` : ''
+        // sampul blog tampil di atas artikel, jadi ikut dihitung sebagai gambar halaman
+        let html = img(b.sampul) + (b.ringkasan ? `<p>${esc(b.ringkasan)}</p>` : '')
         for (const l of (b.langkah ?? []) as Langkah[]) {
           html += `<h2>${esc(l.judul)}</h2>`
           if (l.isi) html += `<p>${esc(l.isi)}</p>`

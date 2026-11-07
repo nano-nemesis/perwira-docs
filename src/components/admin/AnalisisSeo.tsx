@@ -31,6 +31,7 @@ export function AnalisisSeo({ jenis }: { jenis: 'docs' | 'posts' }) {
         slug: d.slug,
         ringkasan: d.ringkasan,
         konten: d.konten,
+        sampul: d.sampul,
         langkah: d.langkah,
         title: meta.title || d.judul,
         description: meta.description || d.ringkasan,
