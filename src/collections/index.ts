@@ -1,6 +1,7 @@
 import { APIError, type CollectionConfig, type Field, type Where } from 'payload'
 import { admin, adminField, apakahAdmin, cegahPenulisTerbit, editor, login, penulis, terbitAtauLogin } from '../access'
 import { endpointFormat } from '../lib/format'
+import { MEREK } from '../lib/situs'
 
 const tersembunyi = { hidden: true } as const
 
@@ -145,6 +146,14 @@ export const Produk: CollectionConfig = {
   fields: [
     { name: 'nama', type: 'text', required: true },
     slug,
+    {
+      name: 'merek',
+      type: 'select',
+      required: true,
+      defaultValue: 'perwiramedia',
+      options: MEREK.map((m) => ({ label: m.nama, value: m.nilai })),
+      admin: { position: 'sidebar', description: 'Produk ini milik merek apa. Menu samping dikelompokkan per merek.' },
+    },
     { name: 'deskripsi', type: 'textarea', localized: true, admin: { description: 'Satu kalimat di kartu beranda dan halaman panduan.' } },
     { name: 'ikon', type: 'select', required: true, defaultValue: 'lapis', options: IKON, admin: { position: 'sidebar' } },
     {

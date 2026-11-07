@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ambilProduk, getPayload, publik } from '@/lib/payload'
-import { pilih, tautan, tautanWa, type Lang } from '@/lib/situs'
+import { MEREK, pilih, tautan, tautanWa, type Lang } from '@/lib/situs'
 import { hanyaTerbaru } from '@/lib/versi'
 import { Ikon } from './Ikon'
 
@@ -18,6 +18,15 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
   })
   // di menu hanya tampilkan versi terbaru tiap panduan; versi lama dibuka dari halaman panduannya
   const docs = hanyaTerbaru(semua)
+  const daftar = (isi: typeof docs) => (
+    <div className="samping-anak">
+      {isi.map((d) => (
+        <Link key={d.slug} href={tautan(lang, `/panduan/${d.slug}`)} aria-current={d.slug === aktif ? 'page' : undefined}>
+          {d.judul}
+        </Link>
+      ))}
+    </div>
+  )
 
   return (
     <aside className="samping" aria-label={pilih(lang, 'Navigasi dokumentasi', 'Documentation navigation')}>
@@ -28,23 +37,39 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
         <Link href={tautan(lang, '/panduan')} className="samping-item">
           <Ikon nama="roket" /> {pilih(lang, 'Semua panduan', 'All guides')}
         </Link>
-        {produk.map((p) => {
-          const isi = docs.filter((d) => d.produk === p.id)
-          if (!isi.length) return null
+        {/* pohon merek > produk > panduan: tertutup semua, kecuali cabang panduan yang sedang dibuka */}
+        {MEREK.map((m) => {
+          const cabang = produk
+            .filter((p) => p.merek === m.nilai)
+            .map((p) => ({ p, isi: docs.filter((d) => d.produk === p.id) }))
+            .filter((c) => c.isi.length)
+          if (!cabang.length) return null
+          const memuat = (isi: typeof docs) => isi.some((d) => d.slug === aktif)
           return (
-            <details key={p.id} open={isi.some((d) => d.slug === aktif) || !aktif}>
+            <details key={m.nilai} className="pohon" open={cabang.some((c) => memuat(c.isi))}>
               <summary className="samping-item">
-                <span className={`ikon-${p.nada}`}>
-                  <Ikon nama={p.ikon} />
-                </span>
-                {p.nama}
+                <span className="pohon-panah" aria-hidden="true" />
+                <span className={`merek-tanda ${m.nada}`}>{m.singkat}</span>
+                <span className="pohon-nama">{m.nama}</span>
+                <span className="pohon-jumlah">{cabang.reduce((n, c) => n + c.isi.length, 0)}</span>
               </summary>
-              <div className="samping-anak">
-                {isi.map((d) => (
-                  <Link key={d.slug} href={tautan(lang, `/panduan/${d.slug}`)} aria-current={d.slug === aktif ? 'page' : undefined}>
-                    {d.judul}
-                  </Link>
-                ))}
+              <div className="pohon-anak">
+                {/* merek dengan satu produk: langsung daftar panduan, tanpa tingkat produk */}
+                {cabang.length === 1
+                  ? daftar(cabang[0].isi)
+                  : cabang.map(({ p, isi }) => (
+                      <details key={p.id} className="pohon" open={memuat(isi)}>
+                        <summary className="samping-item kecil">
+                          <span className="pohon-panah" aria-hidden="true" />
+                          <span className={`ikon-${p.nada}`}>
+                            <Ikon nama={p.ikon} ukuran={16} />
+                          </span>
+                          <span className="pohon-nama">{p.nama}</span>
+                          <span className="pohon-jumlah">{isi.length}</span>
+                        </summary>
+                        {daftar(isi)}
+                      </details>
+                    ))}
               </div>
             </details>
           )

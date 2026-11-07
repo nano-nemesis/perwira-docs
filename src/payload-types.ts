@@ -193,7 +193,7 @@ export interface Doc {
         judul: string;
         isi?: string | null;
         /**
-         * Perintah RouterOS (opsional).
+         * Perintah (opsional): RouterOS, bash, atau cmd.
          */
         perintah?: string | null;
         /**
@@ -230,6 +230,10 @@ export interface Produk {
    * Bagian URL, huruf kecil dan tanda hubung.
    */
   slug: string;
+  /**
+   * Produk ini milik merek apa. Menu samping dikelompokkan per merek.
+   */
+  merek: 'perwiracloud' | 'perwiramedia';
   /**
    * Satu kalimat di kartu beranda dan halaman panduan.
    */
@@ -701,6 +705,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface ProdukSelect<T extends boolean = true> {
   nama?: T;
   slug?: T;
+  merek?: T;
   deskripsi?: T;
   ikon?: T;
   warna?: T;

@@ -207,6 +207,21 @@ summary.samping-item::-webkit-details-marker { display: none; }
 .samping-anak a { padding: 6px 10px; border-radius: 8px; color: var(--redup); }
 .samping-anak a:hover { color: var(--tinta); }
 .samping-anak a[aria-current='page'] { background: var(--aktif-bg); color: var(--aktif-tinta); font-weight: 600; }
+/* menu samping berbentuk pohon: merek > produk > panduan */
+.pohon > summary { list-style: none; }
+.pohon > summary::-webkit-details-marker { display: none; }
+.pohon > summary.samping-item { gap: 10px; height: auto; min-height: 38px; padding: 6px 10px; line-height: 1.25; }
+/* chevron: menunjuk ke kanan saat tertutup, ke bawah saat terbuka */
+.pohon-panah { flex: none; width: 7px; height: 7px; margin: 0 3px 0 2px; border-right: 2px solid var(--redup); border-bottom: 2px solid var(--redup); transform: rotate(-45deg); transition: transform 200ms ease; }
+.pohon[open] > summary > .pohon-panah { transform: rotate(45deg); }
+.pohon-nama { flex: 1; min-width: 0; }
+.pohon-jumlah { flex: none; min-width: 22px; padding: 1px 7px; border-radius: 999px; background: var(--kbd); color: var(--redup); font-size: 11.5px; font-weight: 600; text-align: center; }
+.pohon-anak { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 6px 16px; padding-left: 6px; border-left: 2px solid var(--garis); }
+.pohon-anak .samping-anak { margin: 2px 0 6px 14px; padding-left: 10px; }
+.pohon > summary.samping-item.kecil { min-height: 34px; font-size: 14px; }
+.merek-tanda { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: 0.02em; }
+.merek-tanda.biru { background: linear-gradient(135deg, #2f80ff, #1b5fe0); }
+.merek-tanda.oranye { background: linear-gradient(135deg, #ffa340, #ff7a00); }
 .ikon-biru { color: #2f80ff; display: inline-flex; }
 .ikon-oranye { color: #ff8a00; display: inline-flex; }
 .bantuan { margin-top: 24px; padding: 16px; border-radius: 14px; background: var(--bantuan-bg); border: 1px solid var(--bantuan-garis); }

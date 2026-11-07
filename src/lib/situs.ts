@@ -7,6 +7,13 @@ export const tautan = (lang: Lang, href: string) => (lang === 'en' ? `${href}${h
 
 export type Nada = 'biru' | 'oranye'
 
+/** Merek induk kategori produk. Menu samping dikelompokkan: merek > produk > panduan. */
+export const MEREK = [
+  { nilai: 'perwiracloud', nama: 'PerwiraCloud', singkat: 'PC', nada: 'biru' },
+  { nilai: 'perwiramedia', nama: 'PerwiraMedia', singkat: 'PM', nada: 'oranye' },
+] as const
+export type Merek = (typeof MEREK)[number]['nilai']
+
 /** WhatsApp support PerwiraMedia (0851 7345 2805). */
 export const WA = '6285173452805'
 export const tautanWa = (pesan: string) => `https://wa.me/${WA}?text=${encodeURIComponent(pesan)}`

@@ -41,7 +41,7 @@ for (const k of KATEGORI) {
   const ada = await payload.find({ collection: 'produk', where: { slug: { equals: k.slug } }, limit: 1, depth: 0 })
   let doc = ada.docs[0]
   if (!doc) {
-    doc = await payload.create({ collection: 'produk', locale: 'id', data: { slug: k.slug, nama: k.nama, warna: k.warna, ikon: k.ikon, urutan: k.urutan, deskripsi: k.id } })
+    doc = await payload.create({ collection: 'produk', locale: 'id', data: { slug: k.slug, nama: k.nama, merek: k.slug === 'perwiracloud' ? 'perwiracloud' : 'perwiramedia', warna: k.warna, ikon: k.ikon, urutan: k.urutan, deskripsi: k.id } })
     await payload.update({ collection: 'produk', id: doc.id, locale: 'en', data: { deskripsi: k.en } })
     console.log('produk', k.slug)
   }
