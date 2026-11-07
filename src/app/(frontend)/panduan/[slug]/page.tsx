@@ -10,7 +10,7 @@ import { Sidebar } from '@/components/situs/Sidebar'
 import { alihkanAtau404 } from '@/lib/pengalih'
 import { getPayload, publik } from '@/lib/payload'
 import { grupVersi, hanyaTerbaru, lebihBaru } from '@/lib/versi'
-import { SITUS, bahasa, idYoutube, pilih, tanggal, tautan, tautanWa, type Lang } from '@/lib/situs'
+import { SITUS, bahasa, idYoutube, judulSeo, pilih, tanggal, tautan, tautanWa, type Lang } from '@/lib/situs'
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }
 
@@ -47,7 +47,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const { terbaru } = await ambilVersi(grupVersi(doc), bahasa(sp), (await draftMode()).isEnabled)
   const kanon = terbaru && terbaru.id !== doc.id ? `/panduan/${terbaru.slug}` : url
   return {
-    title: doc.meta?.title || doc.judul,
+    title: judulSeo(doc.meta?.title, doc.judul),
     description: doc.meta?.description || doc.ringkasan || undefined,
     alternates: { canonical: bahasa(sp) === 'en' ? `${kanon}?lang=en` : kanon, languages: { id: url, en: `${url}?lang=en` } },
     openGraph: { type: 'article', title: doc.judul, description: doc.ringkasan || undefined },

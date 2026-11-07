@@ -7,7 +7,7 @@ import { cache } from 'react'
 import { KotakVideo } from '@/components/situs/Interaktif'
 import { alihkanAtau404 } from '@/lib/pengalih'
 import { getPayload, publik } from '@/lib/payload'
-import { SITUS, bahasa, idYoutube, pilih, tanggal, tautan, type Lang } from '@/lib/situs'
+import { SITUS, bahasa, idYoutube, judulSeo, pilih, tanggal, tautan, type Lang } from '@/lib/situs'
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ lang?: string }> }
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   const url = `/blog/${slug}`
   const sampul = typeof p.sampul === 'object' ? p.sampul : null
   return {
-    title: p.meta?.title || p.judul,
+    title: judulSeo(p.meta?.title, p.judul),
     description: p.meta?.description || p.ringkasan || undefined,
     alternates: { canonical: url, languages: { id: url, en: `${url}?lang=en` } },
     openGraph: { type: 'article', title: p.judul, publishedTime: p.terbitPada || undefined, images: sampul?.url ? [sampul.url] : undefined },

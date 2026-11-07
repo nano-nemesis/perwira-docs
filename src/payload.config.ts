@@ -2,7 +2,7 @@ import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { BlocksFeature, CodeBlock, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
+import { BlocksFeature, CodeBlock, EXPERIMENTAL_TableFeature, FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
@@ -100,6 +100,8 @@ export default buildConfig({
       ...defaultFeatures,
       FixedToolbarFeature(),
       BlocksFeature({ blocks: [CodeBlock({ languages: BAHASA_KODE, defaultLanguage: 'routeros' })] }),
+      // tabel: bisa dibuat di editor dan dari Markdown (| a | b |), tampil sebagai <table> di situs
+      EXPERIMENTAL_TableFeature(),
     ],
   }),
   graphQL: { disable: true },

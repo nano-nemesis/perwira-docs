@@ -7,6 +7,13 @@ export const tautan = (lang: Lang, href: string) => (lang === 'en' ? `${href}${h
 
 export type Nada = 'biru' | 'oranye'
 
+/**
+ * Judul <title> dari meta SEO. Meta title buatan plugin SEO sudah berakhiran "| PerwiraMedia Docs",
+ * jadi dipakai utuh (absolute) supaya template layout tidak menambah akhiran kedua kalinya.
+ */
+export const judulSeo = (metaTitle: string | null | undefined, cadangan: string) =>
+  metaTitle ? (/perwiramedia/i.test(metaTitle) ? { absolute: metaTitle } : metaTitle) : cadangan
+
 /** Merek induk kategori produk. Menu samping dikelompokkan: merek > produk > panduan. */
 export const MEREK = [
   { nilai: 'perwiracloud', nama: 'PerwiraCloud', singkat: 'PC', nada: 'biru' },

@@ -344,8 +344,13 @@ a:hover .panah { transform: translateX(3px); }
 .prosa a { color: var(--tautan); text-decoration: underline; }
 .prosa blockquote { margin: 0 0 20px; padding: 14px 18px; border-radius: 14px; background: var(--info); }
 .prosa code { font-family: var(--f-kode), monospace; font-size: 0.9em; }
-.prosa table { width: 100%; border-collapse: collapse; }
-.prosa td, .prosa th { padding: 10px 12px; border-bottom: 1px solid var(--kartu-garis); text-align: left; }
+/* tabel di artikel: bisa digeser di HP, baris judul diberi latar */
+.prosa .lexical-table-container { margin: 0 0 22px; overflow-x: auto; border: 1px solid var(--kartu-garis); border-radius: 12px; }
+.prosa table { width: 100%; border-collapse: collapse; font-size: 14.5px; line-height: 1.55; }
+.prosa td, .prosa th { padding: 10px 12px; border-bottom: 1px solid var(--kartu-garis); text-align: left; vertical-align: top; }
+.prosa tr:last-child > td { border-bottom: 0; }
+.prosa th, .prosa tr:first-child > td { background: var(--kbd); font-weight: 700; }
+.prosa td p, .prosa th p { margin: 0; }
 .masukan { margin-top: 32px; padding: 20px 22px; }
 .masukan textarea { width: 100%; margin: 8px 0 10px; padding: 10px 12px; border: 1px solid var(--garis); border-radius: 10px; background: var(--input); color: var(--tinta); font: inherit; resize: vertical; }
 .sukses { margin: 0; font-weight: 700; color: #16a34a; }
