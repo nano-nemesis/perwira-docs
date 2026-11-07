@@ -1,6 +1,7 @@
 import { ipKlien, lolosBatas, terlaluBanyak } from '@/lib/batas'
 import { cari, teksLexical, type Entri } from '@/lib/cari'
 import { ambilProduk, getPayload, publik } from '@/lib/payload'
+import { hanyaTerbaru } from '@/lib/versi'
 import type { Lang } from '@/lib/situs'
 
 // ponytail: indeks di memori per bahasa, disegarkan tiap 60 detik; ganti ke FTS SQLite kalau konten sudah ribuan halaman
@@ -19,7 +20,7 @@ async function bangun(lang: Lang) {
   const p = (id: unknown) => produk.find((x) => x.id === id)
 
   const indeks: Entri[] = [
-    ...docs.docs.map((d) => ({
+    ...hanyaTerbaru(docs.docs).map((d) => ({
       jenis: 'panduan' as const,
       judul: d.judul,
       ket: `${p(d.produk)?.nama ?? 'Panduan'}, ${d.kode}`,

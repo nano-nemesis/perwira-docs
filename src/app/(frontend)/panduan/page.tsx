@@ -4,16 +4,19 @@ import { Ikon } from '@/components/situs/Ikon'
 import { Sidebar } from '@/components/situs/Sidebar'
 import { ambilProduk, getPayload, publik } from '@/lib/payload'
 import { bahasa, pilih, tautan } from '@/lib/situs'
+import { hanyaTerbaru } from '@/lib/versi'
 
 export const metadata: Metadata = { title: 'Panduan', alternates: { canonical: '/panduan', languages: { id: '/panduan', en: '/panduan?lang=en' } } }
 
 export default async function SemuaPanduan({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = bahasa(await searchParams)
   const payload = await getPayload()
-  const [{ docs }, produk] = await Promise.all([
-    payload.find({ collection: 'docs', locale: lang, limit: 500, depth: 0, sort: 'urutan', ...publik }),
+  const [hasil, produk] = await Promise.all([
+    payload.find({ collection: 'docs', locale: lang, limit: 500, depth: 0, sort: 'urutan', select: { judul: true, slug: true, kode: true, produk: true, versi: true, induk: true }, ...publik }),
     ambilProduk(lang),
   ])
+  // versi lama tidak masuk daftar; dibuka dari pemilih versi di halaman panduannya
+  const docs = hanyaTerbaru(hasil.docs)
 
   return (
     <div className="dua-kolom">

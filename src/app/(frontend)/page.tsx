@@ -5,17 +5,20 @@ import { Ilustrasi } from '@/components/situs/Ilustrasi'
 import { Sidebar } from '@/components/situs/Sidebar'
 import { ambilProduk, getPayload, publik } from '@/lib/payload'
 import { bahasa, pilih, relatif, tautan } from '@/lib/situs'
+import { hanyaTerbaru } from '@/lib/versi'
 
 export default async function Beranda({ searchParams }: { searchParams: Promise<{ lang?: string }> }) {
   const lang = bahasa(await searchParams)
   const en = lang === 'en'
   const payload = await getPayload()
-  const [populer, updates, produk] = await Promise.all([
-    payload.find({ collection: 'docs', locale: lang, limit: 5, sort: '-updatedAt', depth: 0, ...publik }),
+  const [semuaDocs, updates, produk] = await Promise.all([
+    payload.find({ collection: 'docs', locale: lang, limit: 500, sort: '-updatedAt', depth: 0, select: { judul: true, slug: true, kode: true, produk: true, video: true, versi: true, induk: true }, ...publik }),
     payload.find({ collection: 'updates', locale: lang, limit: 3, sort: '-tanggal', depth: 0, ...publik }),
     ambilProduk(lang),
   ])
   const nadaDari = (id: unknown) => produk.find((p) => p.id === id)?.nada ?? 'biru'
+  // panduan terbaru: versi lama tidak ikut tampil
+  const populer = { docs: hanyaTerbaru(semuaDocs.docs).slice(0, 5) }
 
   return (
     <div className="dua-kolom">
