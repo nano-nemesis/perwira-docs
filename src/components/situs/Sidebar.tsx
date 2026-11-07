@@ -39,10 +39,8 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
         </Link>
         {/* pohon merek > produk > panduan: tertutup semua, kecuali cabang panduan yang sedang dibuka */}
         {MEREK.map((m) => {
-          const cabang = produk
-            .filter((p) => p.merek === m.nilai)
-            .map((p) => ({ p, isi: docs.filter((d) => d.produk === p.id) }))
-            .filter((c) => c.isi.length)
+          const milik = produk.filter((p) => p.merek === m.nilai)
+          const cabang = milik.map((p) => ({ p, isi: docs.filter((d) => d.produk === p.id) })).filter((c) => c.isi.length)
           if (!cabang.length) return null
           const memuat = (isi: typeof docs) => isi.some((d) => d.slug === aktif)
           return (
@@ -54,8 +52,8 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
                 <span className="pohon-jumlah">{cabang.reduce((n, c) => n + c.isi.length, 0)}</span>
               </summary>
               <div className="pohon-anak">
-                {/* merek dengan satu produk: langsung daftar panduan, tanpa tingkat produk */}
-                {cabang.length === 1
+                {/* merek yang memang hanya punya satu produk: langsung daftar panduan, tanpa tingkat produk */}
+                {milik.length === 1
                   ? daftar(cabang[0].isi)
                   : cabang.map(({ p, isi }) => (
                       <details key={p.id} className="pohon" open={memuat(isi)}>
