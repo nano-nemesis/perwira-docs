@@ -1,3 +1,5 @@
+import { stat } from 'node:fs/promises'
+import path from 'node:path'
 import { APIError, type CollectionConfig, type Field, type Where } from 'payload'
 import { admin, adminField, apakahAdmin, cegahPenulisTerbit, editor, login, penulis, terbitAtauLogin } from '../access'
 import { endpointFormat } from '../lib/format'
@@ -277,7 +279,19 @@ export const Media: CollectionConfig = {
   slug: 'media',
   admin: { group: 'Konten' },
   access: { read: () => true, create: penulis, update: penulis, delete: editor },
-  upload: { mimeTypes: ['image/*'] },
+  upload: {
+    mimeTypes: ['image/*'],
+    // file yang sudah dihapus dibalas 404, bukan 500 bawaan Payload (crawler menganggap 5xx sebagai server bermasalah)
+    handlers: [
+      async (_req, { params }) => {
+        const ada = await stat(path.resolve('media', params.filename)).then(
+          () => true,
+          () => false,
+        )
+        if (!ada) return new Response('Not found', { status: 404 })
+      },
+    ],
+  },
   fields: [
     { name: 'alt', type: 'text', required: true, localized: true },
     { name: 'kredit', type: 'text', admin: { description: 'Untuk foto dari luar: pembuat dan lisensinya.' } },
