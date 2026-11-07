@@ -54,15 +54,40 @@ export default buildConfig({
         const b = (await req.json?.()) ?? {}
         const { analisisSeo } = await import('./lib/seo')
         const { convertLexicalToHTML } = await import('@payloadcms/richtext-lexical/html')
-        const esc = (x: unknown) => String(x ?? '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string)
+        const esc = (x: unknown) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string)
+        type Langkah = { judul?: string; isi?: string; perintah?: string; gambar?: unknown }
+        type Simpul = { type?: string; value?: unknown; children?: Simpul[] }
+        // form admin hanya mengirim id Media (gambar langkah & node upload di konten); ambil alt-nya supaya Yoast melihat gambarnya
+        const idMedia = (v: unknown) => (typeof v === 'object' && v ? (v as { id?: number }).id : (v as number | undefined))
+        const ids = new Set<number>()
+        for (const l of (b.langkah ?? []) as Langkah[]) if (idMedia(l.gambar)) ids.add(idMedia(l.gambar) as number)
+        const kumpul = (n?: Simpul) => {
+          if (n?.type === 'upload' && idMedia(n.value)) ids.add(idMedia(n.value) as number)
+          n?.children?.forEach(kumpul)
+        }
+        kumpul(b.konten?.root)
+        const media = ids.size ? (await req.payload.find({ collection: 'media', where: { id: { in: [...ids] } }, limit: ids.size, depth: 0, locale: b.locale })).docs : []
+        const img = (v: unknown) => {
+          const m = media.find((x) => x.id === idMedia(v))
+          return m ? `<img src="${esc(m.url)}" alt="${esc(m.alt)}">` : ''
+        }
         let html = b.ringkasan ? `<p>${esc(b.ringkasan)}</p>` : ''
-        for (const l of (b.langkah ?? []) as { judul?: string; isi?: string; perintah?: string }[]) {
+        for (const l of (b.langkah ?? []) as Langkah[]) {
           html += `<h2>${esc(l.judul)}</h2>`
           if (l.isi) html += `<p>${esc(l.isi)}</p>`
+          html += img(l.gambar)
           if (l.perintah) html += `<pre>${esc(l.perintah)}</pre>`
         }
         if (b.konten?.root)
-          html += convertLexicalToHTML({ data: b.konten, disableContainer: true, converters: ({ defaultConverters }) => ({ ...defaultConverters, blocks: { Code: ({ node }: { node: unknown }) => `<pre>${esc((node as { fields?: { code?: string } }).fields?.code)}</pre>` } }) })
+          html += convertLexicalToHTML({
+            data: b.konten,
+            disableContainer: true,
+            converters: ({ defaultConverters }) => ({
+              ...defaultConverters,
+              upload: ({ node }: { node: Simpul }) => img(node.value),
+              blocks: { Code: ({ node }: { node: unknown }) => `<pre>${esc((node as { fields?: { code?: string } }).fields?.code)}</pre>` },
+            }),
+          })
         const hasil = await analisisSeo({ keyphrase: b.fokusKeyphrase || '', title: b.title || '', description: b.description || '', slug: b.slug || '', permalink: `${situs}/${b.jenis === 'docs' ? 'panduan' : 'blog'}/${b.slug || ''}`, html, locale: b.locale })
         return Response.json(hasil)
       },
