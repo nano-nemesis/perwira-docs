@@ -83,7 +83,7 @@ export default async function HalamanDocs({ params, searchParams }: Props) {
     description: doc.ringkasan,
     inLanguage: lang,
     url: `${SITUS}/panduan/${doc.slug}`,
-    step: langkah.map((l, i) => ({ '@type': 'HowToStep', position: i + 1, name: l.judul, text: l.isi || l.judul, ...(typeof l.gambar === 'object' && l.gambar?.url && { image: `${SITUS}${l.gambar.url}` }) })),
+    step: langkah.map((l, i) => ({ '@type': 'HowToStep', position: i + 1, name: l.judul, text: l.isi || l.judul, ...(typeof l.gambar === 'object' && l.gambar?.url && { image: new URL(l.gambar.url, SITUS).href }) })),
     ...(vid && { video: { '@type': 'VideoObject', name: doc.judul, embedUrl: `https://www.youtube.com/embed/${vid}`, thumbnailUrl: `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`, uploadDate: doc.updatedAt } }),
   }
 
