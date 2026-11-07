@@ -239,7 +239,23 @@ export interface Produk {
    */
   deskripsi?: string | null;
   ikon:
-    'awan' | 'lapis' | 'wifi' | 'kartu' | 'kunci' | 'roket' | 'headset' | 'info' | 'pena' | 'jam' | 'cari' | 'rumah';
+    | 'awan'
+    | 'lapis'
+    | 'wifi'
+    | 'kartu'
+    | 'kunci'
+    | 'roket'
+    | 'headset'
+    | 'info'
+    | 'pena'
+    | 'jam'
+    | 'cari'
+    | 'rumah'
+    | 'router'
+    | 'terminal'
+    | 'monitor'
+    | 'struk'
+    | 'perisai';
   warna: 'biru' | 'oranye';
   /**
    * Angka kecil tampil lebih dulu.

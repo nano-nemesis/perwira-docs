@@ -23,6 +23,11 @@ const JALUR: Record<string, React.ReactNode> = {
   unggah: <path d="M12 15V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />,
   unduh: <path d="M12 4v11M7 10l5 5 5-5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4" />,
   video: <path d="M4 6h11v12H4zM15 10l5-3v10l-5-3" />,
+  router: <path d="M3 13h18v6H3zM7 16h.01M11 16h.01M15 16h2M7 13l-1.5-6M17 13l1.5-6" />,
+  terminal: <path d="M3 5h18v14H3zM7 9l3 3-3 3M12 15h5" />,
+  monitor: <path d="M3 4h18v12H3zM8 20h8M12 16v4" />,
+  struk: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3" />,
+  perisai: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4" />,
 }
 
 export function Ikon({ nama, ukuran = 18, className }: { nama: string; ukuran?: number; className?: string }) {

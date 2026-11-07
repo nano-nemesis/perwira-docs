@@ -126,7 +126,7 @@ const tombolFormat = (koleksi: 'docs' | 'posts') => ({
   edit: { beforeDocumentControls: ['/components/admin/Format#Ekspor'] },
 })
 
-const IKON = ['awan', 'lapis', 'wifi', 'kartu', 'kunci', 'roket', 'headset', 'info', 'pena', 'jam', 'cari', 'rumah']
+const IKON = ['awan', 'lapis', 'wifi', 'kartu', 'kunci', 'roket', 'headset', 'info', 'pena', 'jam', 'cari', 'rumah', 'router', 'terminal', 'monitor', 'struk', 'perisai']
 
 /** Kategori produk (PerwiraCloud, PerwiraRadius, dst.). Tambah di admin, langsung muncul di beranda, menu samping, dan filter changelog. */
 export const Produk: CollectionConfig = {

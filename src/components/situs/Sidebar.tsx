@@ -18,7 +18,10 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
   })
   // di menu hanya tampilkan versi terbaru tiap panduan; versi lama dibuka dari halaman panduannya
   const docs = hanyaTerbaru(semua)
-  const daftar = (isi: typeof docs) => (
+  const daftar = (isi: typeof docs) =>
+    !isi.length ? (
+      <p className="samping-anak pohon-kosong">{pilih(lang, 'Panduan sedang ditulis.', 'Guides are being written.')}</p>
+    ) : (
     <div className="samping-anak">
       {isi.map((d) => (
         <Link key={d.slug} href={tautan(lang, `/panduan/${d.slug}`)} aria-current={d.slug === aktif ? 'page' : undefined}>
@@ -39,8 +42,8 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
         </Link>
         {/* pohon merek > produk > panduan: tertutup semua, kecuali cabang panduan yang sedang dibuka */}
         {MEREK.map((m) => {
-          const milik = produk.filter((p) => p.merek === m.nilai)
-          const cabang = milik.map((p) => ({ p, isi: docs.filter((d) => d.produk === p.id) })).filter((c) => c.isi.length)
+          // semua layanan tampil, termasuk yang panduannya belum ada (isinya "sedang ditulis")
+          const cabang = produk.filter((p) => p.merek === m.nilai).map((p) => ({ p, isi: docs.filter((d) => d.produk === p.id) }))
           if (!cabang.length) return null
           const memuat = (isi: typeof docs) => isi.some((d) => d.slug === aktif)
           return (
@@ -53,17 +56,17 @@ export async function Sidebar({ lang, aktif }: { lang: Lang; aktif?: string }) {
               </summary>
               <div className="pohon-anak">
                 {/* merek yang memang hanya punya satu produk: langsung daftar panduan, tanpa tingkat produk */}
-                {milik.length === 1
+                {cabang.length === 1
                   ? daftar(cabang[0].isi)
                   : cabang.map(({ p, isi }) => (
                       <details key={p.id} className="pohon" open={memuat(isi)}>
-                        <summary className="samping-item kecil">
+                        <summary className={`samping-item kecil${isi.length ? '' : ' kosong'}`}>
                           <span className="pohon-panah" aria-hidden="true" />
                           <span className={`ikon-${p.nada}`}>
                             <Ikon nama={p.ikon} ukuran={16} />
                           </span>
                           <span className="pohon-nama">{p.nama}</span>
-                          <span className="pohon-jumlah">{isi.length}</span>
+                          {isi.length > 0 && <span className="pohon-jumlah">{isi.length}</span>}
                         </summary>
                         {daftar(isi)}
                       </details>
