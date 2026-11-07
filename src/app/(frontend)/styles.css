@@ -299,6 +299,8 @@ a:hover .panah { transform: translateX(3px); }
 .langkah-petunjuk { display: flex; align-items: center; gap: 8px; margin: -6px 0 18px; font-size: 13.5px; }
 .langkah-petunjuk svg { flex: none; color: #16a34a; }
 .langkah-judul { margin: 3px 0 2px; font-weight: 700; font-size: 16px; }
+.langkah-gambar { display: block; margin-top: 12px; border: 1px solid var(--garis); border-radius: 10px; overflow: hidden; cursor: zoom-in; }
+.langkah-gambar img { display: block; width: 100%; height: auto; }
 .langkah p { margin: 0; }
 .terminal { margin-top: 14px; border-radius: 12px; overflow: hidden; background: #0b1226; }
 .terminal-atas { display: flex; justify-content: space-between; align-items: center; padding: 8px 8px 8px 14px; background: #121b33; color: #a9b4d0; font-size: 12.5px; }

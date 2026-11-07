@@ -210,7 +210,8 @@ export const Docs: CollectionConfig = {
       fields: [
         { name: 'judul', type: 'text', required: true },
         { name: 'isi', type: 'textarea' },
-        { name: 'perintah', type: 'code', admin: { language: 'shell', description: 'Perintah RouterOS (opsional).' } },
+        { name: 'perintah', type: 'code', admin: { language: 'shell', description: 'Perintah (opsional): RouterOS, bash, atau cmd.' } },
+        { name: 'gambar', type: 'upload', relationTo: 'media', admin: { description: 'Screenshot langkah ini (opsional). Format WebP disarankan.' } },
       ],
     },
     ...fieldSeo('docs'),

@@ -3,7 +3,12 @@ import { useEffect, useState } from 'react'
 import { tautanWa } from '@/lib/situs'
 import { Ikon, IkonYoutube } from './Ikon'
 
-type Langkah = { judul: string; isi?: string | null; perintah?: string | null }
+type Gambar = { url?: string | null; alt?: string | null; width?: number | null; height?: number | null }
+type Langkah = { judul: string; isi?: string | null; perintah?: string | null; gambar?: number | Gambar | null }
+
+/** Perintah RouterOS selalu diawali "/" atau ":". Selain itu (bash, cmd) cukup diberi label "Terminal". */
+const labelPerintah = (kode: string) =>
+  kode.split('\n').every((b) => !b.trim() || b.trim().startsWith('#') || /^[/:]/.test(b.trim())) ? undefined : 'Terminal'
 
 /** Langkah yang bisa dicentang. Posisinya diingat per halaman, jadi aman ditinggal ke Winbox. */
 export function DaftarLangkah({ kode, langkah, en }: { kode: string; langkah: Langkah[]; en: boolean }) {
@@ -58,7 +63,13 @@ export function DaftarLangkah({ kode, langkah, en }: { kode: string; langkah: La
             <div>
               <p className="langkah-judul">{l.judul}</p>
               {l.isi && <p className="redup">{l.isi}</p>}
-              {l.perintah && <Terminal kode={l.perintah} en={en} />}
+              {typeof l.gambar === 'object' && l.gambar?.url && (
+                <a href={l.gambar.url} target="_blank" rel="noopener" className="langkah-gambar">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={l.gambar.url} alt={l.gambar.alt || l.judul} width={l.gambar.width ?? undefined} height={l.gambar.height ?? undefined} loading="lazy" />
+                </a>
+              )}
+              {l.perintah && <Terminal kode={l.perintah} en={en} label={labelPerintah(l.perintah)} />}
             </div>
           </li>
         ))}

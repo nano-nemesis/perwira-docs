@@ -1,6 +1,7 @@
 import * as migration_20261105_112259_baseline from './20261105_112259_baseline';
 import * as migration_20261106_111854_tambah_fokus_keyphrase from './20261106_111854_tambah_fokus_keyphrase';
 import * as migration_20261106_115349_tambah_versi_induk from './20261106_115349_tambah_versi_induk';
+import * as migration_20261107_071449_gambar_langkah from './20261107_071449_gambar_langkah';
 
 export const migrations = [
   {
@@ -16,6 +17,11 @@ export const migrations = [
   {
     up: migration_20261106_115349_tambah_versi_induk.up,
     down: migration_20261106_115349_tambah_versi_induk.down,
-    name: '20261106_115349_tambah_versi_induk'
+    name: '20261106_115349_tambah_versi_induk',
+  },
+  {
+    up: migration_20261107_071449_gambar_langkah.up,
+    down: migration_20261107_071449_gambar_langkah.down,
+    name: '20261107_071449_gambar_langkah'
   },
 ];

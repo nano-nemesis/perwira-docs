@@ -196,6 +196,10 @@ export interface Doc {
          * Perintah RouterOS (opsional).
          */
         perintah?: string | null;
+        /**
+         * Screenshot langkah ini (opsional). Format WebP disarankan.
+         */
+        gambar?: (number | null) | Media;
         id?: string | null;
       }[]
     | null;
@@ -648,6 +652,7 @@ export interface DocsSelect<T extends boolean = true> {
         judul?: T;
         isi?: T;
         perintah?: T;
+        gambar?: T;
         id?: T;
       };
   fokusKeyphrase?: T;
